@@ -48,69 +48,101 @@
 
   <!-- ✅ Script unificado al final -->
   <script>
-    // Al cargar la página
-    document.addEventListener('DOMContentLoaded', () => {
-      cargarNumeros();
-
-      // Evento: agregar/actualizar número
-      document.getElementById('form-agregar').addEventListener('submit', async function (e) {
-        e.preventDefault();
-        const numero = document.getElementById('nuevo-numero').value;
-        const estado = document.getElementById('nuevo-estado').value;
-
-        const res = await fetch('/agregar', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ numero, estado })
-        });
-
+    // ✅ Validar sesión antes de cualquier acción
+    document.addEventListener('DOMContentLoaded', async () => {
+      try {
+        const res = await fetch('/verificar-sesion');
         const data = await res.json();
-        const mensaje = document.getElementById('mensaje-agregar');
-        if (data.exito) {
-          mensaje.innerText = 'Número agregado/actualizado correctamente';
-          document.getElementById('form-agregar').reset();
-          cargarNumeros();
-        } else {
-          mensaje.innerText = 'Error: ' + data.mensaje;
-        }
-      });
 
-      // Evento: cambiar contraseña
-      document.getElementById('form-cambiar-contrasena').addEventListener('submit', async e => {
-        e.preventDefault();
-
-        const contrasenaNueva = document.getElementById('contrasena-nueva').value.trim();
-        const mensaje = document.getElementById('mensaje-contrasena');
-
-        if (!contrasenaNueva) {
-          mensaje.style.color = 'red';
-          mensaje.textContent = 'Ingrese una nueva contraseña.';
+        if (!data.activa) {
+          alert('Sesión no activa. Por favor inicia sesión.');
+          window.location.href = 'login.html';
           return;
         }
 
-        try {
-          const res = await fetch('/cambiar-contrasena', {
+        cargarNumeros();
+
+        // Evento: agregar/actualizar número
+        document.getElementById('form-agregar').addEventListener('submit', async function (e) {
+          e.preventDefault();
+          const numero = document.getElementById('nuevo-numero').value;
+          const estado = document.getElementById('nuevo-estado').value;
+
+          const res = await fetch('/agregar', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ usuario: 'admin', contrasenaNueva })
+            body: JSON.stringify({ numero, estado })
           });
-          const data = await res.json();
 
+          const data = await res.json();
+          const mensaje = document.getElementById('mensaje-agregar');
           if (data.exito) {
-            mensaje.style.color = 'green';
-            mensaje.textContent = data.mensaje;
-            document.getElementById('form-cambiar-contrasena').reset();
-            cargarNumeros(); // 🔄 Volver a cargar la tabla
+            mensaje.innerText = 'Número agregado/actualizado correctamente';
+            document.getElementById('form-agregar').reset();
+            cargarNumeros();
           } else {
-            mensaje.style.color = 'red';
-            mensaje.textContent = data.mensaje || 'Error al actualizar contraseña.';
+            mensaje.innerText = 'Error: ' + data.mensaje;
           }
-        } catch (error) {
-          mensaje.style.color = 'red';
-          mensaje.textContent = 'Error al conectar con el servidor.';
-          console.error(error);
-        }
-      });
+        });
+
+        // Evento: cambiar contraseña
+        document.getElementById('form-cambiar-contrasena').addEventListener('submit', async e => {
+          e.preventDefault();
+
+          const contrasenaNueva = document.getElementById('contrasena-nueva').value.trim();
+          const mensaje = document.getElementById('mensaje-contrasena');
+
+          if (!contrasenaNueva) {
+            mensaje.style.color = 'red';
+            mensaje.textContent = 'Ingrese una nueva contraseña.';
+            return;
+          }
+
+          try {
+            const res = await fetch('/cambiar-contrasena', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({ usuario: 'admin', contrasenaNueva })
+            });
+            const data = await res.json();
+
+            if (data.exito) {
+              mensaje.style.color = 'green';
+              mensaje.textContent = data.mensaje;
+              document.getElementById('form-cambiar-contrasena').reset();
+              cargarNumeros(); // 🔄 Volver a cargar la tabla
+            } else {
+              mensaje.style.color = 'red';
+              mensaje.textContent = data.mensaje || 'Error al actualizar contraseña.';
+            }
+          } catch (error) {
+            mensaje.style.color = 'red';
+            mensaje.textContent = 'Error al conectar con el servidor.';
+            console.error(error);
+          }
+        });
+
+        // Botón cerrar sesión
+        document.getElementById('btn-logout').addEventListener('click', async () => {
+          try {
+            const res = await fetch('/logout', { method: 'POST', credentials: 'include' });
+            const data = await res.json();
+
+            if (data.mensaje) {
+              alert('Sesión cerrada correctamente');
+              window.location.href = 'login.html';
+            }
+          } catch (error) {
+            console.error('Error al cerrar sesión:', error);
+            alert('No se pudo cerrar sesión');
+          }
+        });
+
+      } catch (error) {
+        console.error('Error al verificar sesión:', error);
+        alert('Error al verificar sesión. Redirigiendo al login.');
+        window.location.href = 'login.html';
+      }
     });
 
     // Cargar todos los números en la tabla
@@ -156,21 +188,6 @@
         alert("Error al actualizar estado");
       }
     }
-      // Botón cerrar sesión
-    document.getElementById('btn-logout').addEventListener('click', async () => {
-      try {
-        const res = await fetch('/logout', { method: 'POST', credentials: 'include'});
-        const data = await res.json();
-
-        if (data.mensaje) {
-          alert('Sesión cerrada correctamente');
-          window.location.href = 'login.html'; // Redirige al login
-        }
-      } catch (error) {
-        console.error('Error al cerrar sesión:', error);
-        alert('No se pudo cerrar sesión');
-      }
-    });
   </script>
 </body>
 </html>
