@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <title>Login Administrador</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <h1>Login Administrador</h1>
+  <form id="login-form">
+    <input type="text" id="usuario" placeholder="Usuario" required />
+    <input type="password" id="contrasena" placeholder="Contraseña" required />
+    <button type="submit">Ingresar</button>
+  </form>
+  <p id="mensaje-error" style="color:red;"></p>
+
+  <script>
+    document.getElementById('login-form').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const usuario = document.getElementById('usuario').value.trim();
+      const contrasena = document.getElementById('contrasena').value.trim();
+      const mensajeError = document.getElementById('mensaje-error');
+
+      const res = await fetch('/login', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ usuario, contrasena })
+      });
+
+      const data = await res.json();
+
+      if (data.autenticado) {
+        // Redirigir al panel si login exitoso
+        window.location.href = '/panel.html';
+      } else {
+        mensajeError.textContent = 'Usuario o contraseña incorrectos';
+      }
+    });
+  </script>
+</body>
+</html>

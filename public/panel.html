@@ -1,0 +1,176 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <title>Panel del Administrador</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <h1>Panel de Administración</h1>
+  <button id="btn-logout">Cerrar sesión</button>
+
+  <!-- Formulario para agregar o actualizar un número -->
+  <form id="form-agregar">
+    <input type="text" id="nuevo-numero" placeholder="Número" required>
+    <select id="nuevo-estado">
+      <option value="Aprobado">Aprobado</option>
+      <option value="No aprobado">No aprobado</option>
+    </select>
+    <button type="submit">Agregar / Actualizar</button>
+  </form>
+  <p id="mensaje-agregar"></p>
+
+  <hr>
+
+  <!-- Formulario para cambiar contraseña -->
+  <h2>Cambiar Contraseña</h2>
+  <form id="form-cambiar-contrasena">
+    <input type="password" id="contrasena-nueva" placeholder="Nueva contraseña" required />
+    <button type="submit">Actualizar contraseña</button>
+  </form>
+  <p id="mensaje-contrasena"></p>
+
+  <hr>
+
+  <!-- Tabla de números registrados -->
+  <h2>Lista de números registrados</h2>
+  <table border="1" id="tabla-estados">
+    <thead>
+      <tr>
+        <th>Número</th>
+        <th>Estado actual</th>
+        <th>Nuevo estado</th>
+        <th>Actualizar</th>
+      </tr>
+    </thead>
+    <tbody></tbody>
+  </table>
+
+  <!-- ✅ Script unificado al final -->
+  <script>
+    // Al cargar la página
+    document.addEventListener('DOMContentLoaded', () => {
+      cargarNumeros();
+
+      // Evento: agregar/actualizar número
+      document.getElementById('form-agregar').addEventListener('submit', async function (e) {
+        e.preventDefault();
+        const numero = document.getElementById('nuevo-numero').value;
+        const estado = document.getElementById('nuevo-estado').value;
+
+        const res = await fetch('/agregar', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ numero, estado })
+        });
+
+        const data = await res.json();
+        const mensaje = document.getElementById('mensaje-agregar');
+        if (data.exito) {
+          mensaje.innerText = 'Número agregado/actualizado correctamente';
+          document.getElementById('form-agregar').reset();
+          cargarNumeros();
+        } else {
+          mensaje.innerText = 'Error: ' + data.mensaje;
+        }
+      });
+
+      // Evento: cambiar contraseña
+      document.getElementById('form-cambiar-contrasena').addEventListener('submit', async e => {
+        e.preventDefault();
+
+        const contrasenaNueva = document.getElementById('contrasena-nueva').value.trim();
+        const mensaje = document.getElementById('mensaje-contrasena');
+
+        if (!contrasenaNueva) {
+          mensaje.style.color = 'red';
+          mensaje.textContent = 'Ingrese una nueva contraseña.';
+          return;
+        }
+
+        try {
+          const res = await fetch('/cambiar-contrasena', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ usuario: 'admin', contrasenaNueva })
+          });
+          const data = await res.json();
+
+          if (data.exito) {
+            mensaje.style.color = 'green';
+            mensaje.textContent = data.mensaje;
+            document.getElementById('form-cambiar-contrasena').reset();
+            cargarNumeros(); // 🔄 Volver a cargar la tabla
+          } else {
+            mensaje.style.color = 'red';
+            mensaje.textContent = data.mensaje || 'Error al actualizar contraseña.';
+          }
+        } catch (error) {
+          mensaje.style.color = 'red';
+          mensaje.textContent = 'Error al conectar con el servidor.';
+          console.error(error);
+        }
+      });
+    });
+
+    // Cargar todos los números en la tabla
+    async function cargarNumeros() {
+      const res = await fetch('/todos');
+      const data = await res.json();
+
+      const tbody = document.querySelector('#tabla-estados tbody');
+      tbody.innerHTML = '';
+
+      data.forEach(({ numero, estado }) => {
+        const fila = document.createElement('tr');
+        fila.innerHTML = `
+          <td>${numero}</td>
+          <td>${estado}</td>
+          <td>
+            <select>
+              <option value="Aprobado" ${estado === 'Aprobado' ? 'selected' : ''}>Aprobado</option>
+              <option value="No aprobado" ${estado === 'No aprobado' ? 'selected' : ''}>No aprobado</option>
+            </select>
+          </td>
+          <td><button onclick="actualizarEstado('${numero}', this)">Actualizar</button></td>
+        `;
+        tbody.appendChild(fila);
+      });
+    }
+
+    // Actualizar estado desde la tabla
+    async function actualizarEstado(numero, btn) {
+      const nuevoEstado = btn.closest('tr').querySelector('select').value;
+
+      const res = await fetch('/agregar', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ numero, estado: nuevoEstado })
+      });
+
+      const data = await res.json();
+      if (data.exito) {
+        alert("Estado actualizado correctamente");
+        cargarNumeros();
+      } else {
+        alert("Error al actualizar estado");
+      }
+    }
+      // Botón cerrar sesión
+    document.getElementById('btn-logout').addEventListener('click', async () => {
+      try {
+        const res = await fetch('/logout', { method: 'POST' });
+        const data = await res.json();
+
+        if (data.mensaje) {
+          alert('Sesión cerrada correctamente');
+          window.location.href = 'login.html'; // Redirige al login
+        }
+      } catch (error) {
+        console.error('Error al cerrar sesión:', error);
+        alert('No se pudo cerrar sesión');
+      }
+    });
+  </script>
+</body>
+</html>

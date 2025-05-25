@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <title>Login Administrador</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <div class="container">
+    <h2>Iniciar sesión como administrador</h2>
+    <input type="text" id="usuario" placeholder="Usuario" />
+    <input type="password" id="contrasena" placeholder="Contraseña" />
+    <button onclick="loginAdmin()">Ingresar</button>
+    <p id="loginMensaje"></p>
+  </div>
+
+  <script>
+    function loginAdmin() {
+      const usuario = document.getElementById("usuario").value.trim();
+      const contrasena = document.getElementById("contrasena").value.trim();
+      const mensaje = document.getElementById("loginMensaje");
+
+      fetch('http://localhost:3000/login', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ usuario, contrasena })
+      })
+      .then(res => res.json())
+      .then(data => {
+        if (data.autenticado) {
+          // Guardar token o bandera de sesión
+          localStorage.setItem("adminAutenticado", "true");
+          window.location.href = "panel.html";
+        } else {
+          mensaje.textContent = "Credenciales incorrectas.";
+          mensaje.style.color = "red";
+        }
+      });
+    }
+  </script>
+</body>
+</html>
