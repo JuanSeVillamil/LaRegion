@@ -1,109 +1,63 @@
+require('dotenv').config();
 const express = require('express');
-const sqlite3 = require('sqlite3').verbose();
-const path = require('path');
 const session = require('express-session');
+const path = require('path');
+const { Pool } = require('pg');
 
 const app = express();
-const PORT = 3000;
+const PORT = process.env.PORT || 3000;
 
-// Middleware para parsear JSON
+// Conexión a PostgreSQL
+const pool = new Pool({
+  host: process.env.PG_HOST,
+  port: process.env.PG_PORT,
+  user: process.env.PG_USER,
+  password: process.env.PG_PASSWORD,
+  database: process.env.PG_DATABASE,
+  ssl: process.env.NODE_ENV === 'production' ? { rejectUnauthorized: false } : false
+});
+
+// Middleware
 app.use(express.json());
-
-// Configurar sesión
-app.use(session({
-  secret: 'tu_clave_secreta_aqui', // cambia por algo seguro
-  resave: false,
-  saveUninitialized: false,
-}));
-
-// Servir archivos estáticos
 app.use(express.static(path.join(__dirname, 'public')));
 
-// Base de datos SQLite
-const db = new sqlite3.Database('./basedatos.db', (err) => {
-  if (err) {
-    console.error('❌ Error al conectar con SQLite:', err.message);
-  } else {
-    console.log('✅ Conectado a la base de datos SQLite');
+app.use(session({
+  secret: 'clave_secreta_segura',
+  resave: false,
+  saveUninitialized: false
+}));
+
+// Inicializar tablas
+(async () => {
+  try {
+    await pool.query(`
+      CREATE TABLE IF NOT EXISTS admin (
+        id SERIAL PRIMARY KEY,
+        usuario TEXT UNIQUE,
+        contrasena TEXT
+      );
+    `);
+
+    await pool.query(`
+      CREATE TABLE IF NOT EXISTS estados (
+        numero TEXT PRIMARY KEY,
+        estado TEXT NOT NULL
+      );
+    `);
+
+    const result = await pool.query("SELECT * FROM admin WHERE usuario = 'admin'");
+    if (result.rows.length === 0) {
+      await pool.query("INSERT INTO admin (usuario, contrasena) VALUES ($1, $2)", ['admin', '1234']);
+      console.log('🛡️ Usuario admin creado');
+    }
+
+    console.log('✅ Tablas listas');
+  } catch (err) {
+    console.error('❌ Error al crear tablas:', err);
   }
-});
+})();
 
-db.run(`
-  CREATE TABLE IF NOT EXISTS admin (
-    id INTEGER PRIMARY KEY,
-    usuario TEXT UNIQUE,
-    contrasena TEXT
-  )
-`, (err) => {
-  if (err) {
-    console.error('Error creando tabla admin:', err.message);
-  } else {
-    // Insertar usuario admin y contraseña inicial si no existe
-    db.get("SELECT * FROM admin WHERE usuario = 'admin'", (err, row) => {
-      if (err) return console.error(err.message);
-      if (!row) {
-        db.run("INSERT INTO admin (usuario, contrasena) VALUES (?, ?)", ['admin', '1234']);
-      }
-    });
-  }
-});
-
-
-db.run(`
-  CREATE TABLE IF NOT EXISTS estados (
-    numero TEXT PRIMARY KEY,
-    estado TEXT NOT NULL
-  )
-`);
-
-// Ruta login
-app.post('/login', (req, res) => {
-  const { usuario, contrasena } = req.body;
-
-  db.get('SELECT contrasena FROM admin WHERE usuario = ?', [usuario], (err, row) => {
-    if (err) {
-      return res.status(500).json({ autenticado: false });
-    }
-    if (row && row.contrasena === contrasena) {
-      req.session.usuario = usuario; // GUARDAR SESION
-      res.json({ autenticado: true });
-    } else {
-      res.json({ autenticado: false });
-    }
-  });
-});
-
-app.post('/cambiar-contrasena', (req, res) => {
-  const { usuario, contrasenaNueva } = req.body;
-
-  if (!usuario || !contrasenaNueva) {
-    return res.status(400).json({ exito: false, mensaje: 'Datos incompletos' });
-  }
-
-  db.run('UPDATE admin SET contrasena = ? WHERE usuario = ?', [contrasenaNueva, usuario], function (err) {
-    if (err) {
-      return res.status(500).json({ exito: false, mensaje: 'Error al actualizar contraseña' });
-    }
-    if (this.changes === 0) {
-      return res.status(404).json({ exito: false, mensaje: 'Usuario no encontrado' });
-    }
-    res.json({ exito: true, mensaje: 'Contraseña actualizada correctamente' });
-  });
-});
-
-app.post('/logout', (req, res) => {
-  req.session.destroy(err => {
-    if (err) {
-      return res.status(500).json({ mensaje: 'Error al cerrar sesión' });
-    }
-    res.json({ mensaje: 'Sesión cerrada correctamente' });
-  });
-});
-
-
-
-
-// Middleware para proteger rutas
+// Middleware de protección
 function protegerRuta(req, res, next) {
   if (req.session.usuario) {
     next();
@@ -112,55 +66,90 @@ function protegerRuta(req, res, next) {
   }
 }
 
-// Ruta protegida ejemplo
-app.get('/panel.html', protegerRuta, (req, res, next) => {
-  // Esto funciona porque express.static sirve archivos,
-  // pero para proteger la ruta hacemos esto antes
-  next();
+// Rutas
+app.post('/login', async (req, res) => {
+  const { usuario, contrasena } = req.body;
+
+  try {
+    const result = await pool.query('SELECT contrasena FROM admin WHERE usuario = $1', [usuario]);
+    if (result.rows.length > 0 && result.rows[0].contrasena === contrasena) {
+      req.session.usuario = usuario;
+      res.json({ autenticado: true });
+    } else {
+      res.json({ autenticado: false });
+    }
+  } catch (error) {
+    res.status(500).json({ autenticado: false });
+  }
 });
 
-// Otras rutas (agregar, verificar, todos) igual que antes
+app.post('/cambiar-contrasena', async (req, res) => {
+  const { usuario, contrasenaNueva } = req.body;
 
-// Ruta para agregar o actualizar número
-app.post('/agregar', protegerRuta, (req, res) => {
+  if (!usuario || !contrasenaNueva) {
+    return res.status(400).json({ exito: false, mensaje: 'Datos incompletos' });
+  }
+
+  try {
+    const result = await pool.query('UPDATE admin SET contrasena = $1 WHERE usuario = $2', [contrasenaNueva, usuario]);
+    if (result.rowCount === 0) {
+      res.status(404).json({ exito: false, mensaje: 'Usuario no encontrado' });
+    } else {
+      res.json({ exito: true, mensaje: 'Contraseña actualizada correctamente' });
+    }
+  } catch (err) {
+    res.status(500).json({ exito: false, mensaje: 'Error en la base de datos' });
+  }
+});
+
+app.post('/agregar', protegerRuta, async (req, res) => {
   const { numero, estado } = req.body;
 
   if (!numero || !estado) {
     return res.status(400).json({ exito: false, mensaje: 'Datos incompletos' });
   }
 
-  db.run('INSERT OR REPLACE INTO estados (numero, estado) VALUES (?, ?)', [numero, estado], function (err) {
-    if (err) {
-      res.status(500).json({ exito: false, mensaje: 'Error al insertar' });
-    } else {
-      res.json({ exito: true });
-    }
-  });
+  try {
+    await pool.query(`
+      INSERT INTO estados (numero, estado)
+      VALUES ($1, $2)
+      ON CONFLICT (numero)
+      DO UPDATE SET estado = EXCLUDED.estado
+    `, [numero, estado]);
+
+    res.json({ exito: true });
+  } catch (err) {
+    res.status(500).json({ exito: false, mensaje: 'Error al insertar' });
+  }
 });
 
-// Ruta para verificar número (abierta)
-app.post('/verificar', (req, res) => {
+app.post('/verificar', async (req, res) => {
   const { numero } = req.body;
-  db.get('SELECT estado FROM estados WHERE numero = ?', [numero], (err, row) => {
-    if (err) {
-      res.status(500).json({ mensaje: 'Error en la base de datos' });
-    } else if (row) {
-      res.json({ estado: row.estado });
+
+  try {
+    const result = await pool.query('SELECT estado FROM estados WHERE numero = $1', [numero]);
+    if (result.rows.length > 0) {
+      res.json({ estado: result.rows[0].estado });
     } else {
       res.json({ estado: 'No aprobado' });
     }
-  });
+  } catch (err) {
+    res.status(500).json({ mensaje: 'Error en la base de datos' });
+  }
 });
 
-// Ruta para obtener todos los números (protegida)
-app.get('/todos', protegerRuta, (req, res) => {
-  db.all('SELECT numero, estado FROM estados', [], (err, rows) => {
-    if (err) {
-      res.status(500).json({ error: 'Error al obtener datos' });
-    } else {
-      res.json(rows);
-    }
-  });
+app.get('/todos', protegerRuta, async (req, res) => {
+  try {
+    const result = await pool.query('SELECT numero, estado FROM estados');
+    res.json(result.rows);
+  } catch (err) {
+    res.status(500).json({ error: 'Error al obtener datos' });
+  }
+});
+
+app.get('/logout', (req, res) => {
+  req.session.destroy();
+  res.redirect('/login.html');
 });
 
 // Servidor
