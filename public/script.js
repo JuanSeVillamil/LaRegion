@@ -8,7 +8,12 @@ function verificarNumero() {
     return;
   }
 
-  fetch('http://localhost:3000/verificar', {
+  // Detecta si estás en local o en producción
+  const API_URL = window.location.hostname === 'localhost'
+    ? 'http://localhost:3000'
+    : 'https://laregion.onrender.com';
+
+  fetch(`${API_URL}/verificar`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ numero })
@@ -18,7 +23,7 @@ function verificarNumero() {
     if (data.estado === "Aprobado") {
       mensaje.textContent = "✅ Aprobado";
       mensaje.style.color = "green";
-    } else if (data.estado === "No aprobado") {  // ojo "No aprobado" con minúsculas
+    } else if (data.estado === "No aprobado") {
       mensaje.textContent = "❌ No Aprobado";
       mensaje.style.color = "red";
     } else {
@@ -32,3 +37,4 @@ function verificarNumero() {
     mensaje.style.color = "red";
   });
 }
+
