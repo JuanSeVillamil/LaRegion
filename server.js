@@ -64,6 +64,15 @@ function protegerRuta(req, res, next) {
   }
 }
 
+app.get('/verificar-sesion', (req, res) => {
+  if (req.session && req.session.usuario === 'admin') {
+    res.json({ activa: true });
+  } else {
+    res.json({ activa: false });
+  }
+});
+
+
 app.post('/login', async (req, res) => {
   const { usuario, contrasena } = req.body;
 
