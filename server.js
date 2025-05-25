@@ -5,22 +5,10 @@ const path = require('path');
 const { Pool } = require('pg');
 const pgSession = require('connect-pg-simple')(session);
 
-app.use(session({
-  store: new pgSession({
-    pool: pool,                // usa el mismo pool de PostgreSQL
-    tableName: 'session'       // puedes cambiar el nombre si quieres
-  }),
-  secret: 'clave_secreta_segura',
-  resave: false,
-  saveUninitialized: false,
-  cookie: { maxAge: 30 * 24 * 60 * 60 * 1000 } // 30 días
-}));
-
-
-const app = express();
+const app = express();  // ¡Primero declaramos app!
 const PORT = process.env.PORT || 3000;
 
-// Conexión a PostgreSQL
+// Conexión a PostgreSQL (pool)
 const pool = new Pool({
   connectionString: process.env.DATABASE_URL,
   ssl: {
@@ -28,15 +16,21 @@ const pool = new Pool({
   }
 });
 
-// Middleware
-app.use(express.json());
-app.use(express.static(path.join(__dirname, 'public')));
-
+// Middleware para sesión usando connect-pg-simple para guardar sesiones en Postgres
 app.use(session({
+  store: new pgSession({
+    pool: pool,                // usa el mismo pool de PostgreSQL
+    tableName: 'session'       // nombre tabla sesiones (puedes cambiarlo)
+  }),
   secret: 'clave_secreta_segura',
   resave: false,
-  saveUninitialized: false
+  saveUninitialized: false,
+  cookie: { maxAge: 30 * 24 * 60 * 60 * 1000 } // 30 días
 }));
+
+// Middleware para parsear JSON y servir estáticos
+app.use(express.json());
+app.use(express.static(path.join(__dirname, 'public')));
 
 // Inicializar tablas
 (async () => {
@@ -56,6 +50,8 @@ app.use(session({
       );
     `);
 
+    // La tabla para sesiones la crea connect-pg-simple automáticamente
+
     const result = await pool.query("SELECT * FROM admin WHERE usuario = 'admin'");
     if (result.rows.length === 0) {
       await pool.query("INSERT INTO admin (usuario, contrasena) VALUES ($1, $2)", ['admin', '1234']);
@@ -68,7 +64,7 @@ app.use(session({
   }
 })();
 
-// Middleware de protección
+// Middleware de protección para rutas privadas
 function protegerRuta(req, res, next) {
   if (req.session.usuario) {
     next();
