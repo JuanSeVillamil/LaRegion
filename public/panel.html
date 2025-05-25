@@ -159,7 +159,7 @@
       // Botón cerrar sesión
     document.getElementById('btn-logout').addEventListener('click', async () => {
       try {
-        const res = await fetch('/logout', { method: 'POST' });
+        const res = await fetch('/logout', { method: 'POST', credentials: 'include'});
         const data = await res.json();
 
         if (data.mensaje) {

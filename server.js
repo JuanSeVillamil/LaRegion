@@ -5,34 +5,28 @@ const path = require('path');
 const { Pool } = require('pg');
 const pgSession = require('connect-pg-simple')(session);
 
-const app = express();  // ¡Primero declaramos app!
+const app = express();
 const PORT = process.env.PORT || 3000;
 
-// Conexión a PostgreSQL (pool)
 const pool = new Pool({
   connectionString: process.env.DATABASE_URL,
-  ssl: {
-    rejectUnauthorized: false
-  }
+  ssl: { rejectUnauthorized: false }
 });
 
-// Middleware para sesión usando connect-pg-simple para guardar sesiones en Postgres
 app.use(session({
   store: new pgSession({
-    pool: pool,                // usa el mismo pool de PostgreSQL
-    tableName: 'session'       // nombre tabla sesiones (puedes cambiarlo)
+    pool: pool,
+    tableName: 'session'
   }),
   secret: 'clave_secreta_segura',
   resave: false,
   saveUninitialized: false,
-  cookie: { maxAge: 30 * 24 * 60 * 60 * 1000 } // 30 días
+  cookie: { maxAge: 30 * 24 * 60 * 60 * 1000 }
 }));
 
-// Middleware para parsear JSON y servir estáticos
 app.use(express.json());
 app.use(express.static(path.join(__dirname, 'public')));
 
-// Inicializar tablas
 (async () => {
   try {
     await pool.query(`
@@ -50,8 +44,6 @@ app.use(express.static(path.join(__dirname, 'public')));
       );
     `);
 
-    // La tabla para sesiones la crea connect-pg-simple automáticamente
-
     const result = await pool.query("SELECT * FROM admin WHERE usuario = 'admin'");
     if (result.rows.length === 0) {
       await pool.query("INSERT INTO admin (usuario, contrasena) VALUES ($1, $2)", ['admin', '1234']);
@@ -64,16 +56,14 @@ app.use(express.static(path.join(__dirname, 'public')));
   }
 })();
 
-// Middleware de protección para rutas privadas
 function protegerRuta(req, res, next) {
-  if (req.session.usuario) {
+  if (req.session && req.session.usuario === 'admin') {
     next();
   } else {
-    res.status(401).send('No autorizado');
+    res.status(401).json({ mensaje: 'No autorizado' });
   }
 }
 
-// Rutas
 app.post('/login', async (req, res) => {
   const { usuario, contrasena } = req.body;
 
@@ -90,7 +80,7 @@ app.post('/login', async (req, res) => {
   }
 });
 
-app.post('/cambiar-contrasena', async (req, res) => {
+app.post('/cambiar-contrasena', protegerRuta, async (req, res) => {
   const { usuario, contrasenaNueva } = req.body;
 
   if (!usuario || !contrasenaNueva) {
@@ -154,12 +144,18 @@ app.get('/todos', protegerRuta, async (req, res) => {
   }
 });
 
-app.get('/logout', (req, res) => {
-  req.session.destroy();
-  res.redirect('/login.html');
+app.post('/logout', (req, res) => {
+  req.session.destroy(err => {
+    if (err) {
+      console.error('❌ Error al cerrar sesión:', err);
+      return res.status(500).json({ mensaje: 'Error al cerrar sesión' });
+    }
+
+    res.clearCookie('connect.sid');
+    res.json({ mensaje: 'Sesión cerrada correctamente' });
+  });
 });
 
-// Servidor
 app.listen(PORT, () => {
   console.log(`🚀 Servidor corriendo en http://localhost:${PORT}`);
 });
