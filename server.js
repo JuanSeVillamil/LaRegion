@@ -114,7 +114,7 @@ app.post('/agregar', async (req, res) => {
   try {
     // Usando SQL con parámetros para evitar inyección
     const query = `
-      INSERT INTO tu_tabla (numero, estado, tomador, asegurado)
+      INSERT INTO estados (numero, estado, tomador, asegurado)
       VALUES ($1, $2, $3, $4)
       ON CONFLICT (numero) DO UPDATE SET
         estado = EXCLUDED.estado,

@@ -16,6 +16,8 @@
       <option value="Aprobado">Aprobado</option>
       <option value="No aprobado">No aprobado</option>
     </select>
+    <input type="text" id="nuevo-tomador" placeholder="Tomador">
+    <input type="text" id="nuevo-asegurado" placeholder="Asegurado">
     <button type="submit">Agregar / Actualizar</button>
   </form>
   <p id="mensaje-agregar"></p>
@@ -39,6 +41,8 @@
       <tr>
         <th>Número</th>
         <th>Estado actual</th>
+        <th>Tomador</th>
+        <th>Asegurado</th>
         <th>Nuevo estado</th>
         <th>Actualizar</th>
       </tr>
@@ -67,11 +71,13 @@
           e.preventDefault();
           const numero = document.getElementById('nuevo-numero').value;
           const estado = document.getElementById('nuevo-estado').value;
+          const tomador = document.getElementById('nuevo-tomador').value;
+          const asegurado = document.getElementById('nuevo-asegurado').value;
 
           const res = await fetch('/agregar', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ numero, estado })
+            body: JSON.stringify({ numero, estado, tomador, asegurado })
           });
 
           const data = await res.json();
@@ -153,11 +159,13 @@
       const tbody = document.querySelector('#tabla-estados tbody');
       tbody.innerHTML = '';
 
-      data.forEach(({ numero, estado }) => {
+      data.forEach(({ numero, estado, tomador, asegurado }) => {
         const fila = document.createElement('tr');
         fila.innerHTML = `
           <td>${numero}</td>
           <td>${estado}</td>
+          <td><input type="text" class="input-tomador" value="${tomador || ''}"></td>
+          <td><input type="text" class="input-asegurado" value="${asegurado || ''}"></td>
           <td>
             <select>
               <option value="Aprobado" ${estado === 'Aprobado' ? 'selected' : ''}>Aprobado</option>
@@ -172,22 +180,26 @@
 
     // Actualizar estado desde la tabla
     async function actualizarEstado(numero, btn) {
-      const nuevoEstado = btn.closest('tr').querySelector('select').value;
+      const fila = btn.closest('tr');
+      const nuevoEstado = fila.querySelector('select').value;
+      const nuevoTomador = fila.querySelector('.input-tomador').value;
+      const nuevoAsegurado = fila.querySelector('.input-asegurado').value;
 
       const res = await fetch('/agregar', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ numero, estado: nuevoEstado })
+        body: JSON.stringify({ numero, estado: nuevoEstado, tomador: nuevoTomador, asegurado: nuevoAsegurado })
       });
 
       const data = await res.json();
       if (data.exito) {
-        alert("Estado actualizado correctamente");
+        alert("Datos actualizados correctamente");
         cargarNumeros();
       } else {
-        alert("Error al actualizar estado");
+        alert("Error al actualizar datos");
       }
     }
+
   </script>
 </body>
 </html>
