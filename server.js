@@ -4,6 +4,7 @@ const session = require('express-session');
 const path = require('path');
 const { Pool } = require('pg');
 const pgSession = require('connect-pg-simple')(session);
+const cors = require('cors');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -12,6 +13,11 @@ const pool = new Pool({
   connectionString: process.env.DATABASE_URL,
   ssl: { rejectUnauthorized: false }
 });
+
+app.use(cors({
+  origin: ['https://www.afianzadoralaregional.com', 'https://afianzadoralaregional.com'], // agrega tus dominios
+  credentials: true
+}));
 
 app.use(session({
   store: new pgSession({

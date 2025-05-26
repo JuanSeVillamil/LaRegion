@@ -8,9 +8,11 @@ function verificarNumero() {
     return;
   }
 
-  const API_URL = window.location.hostname === 'localhost'
-    ? 'http://localhost:3000'
-    : 'https://laregion.onrender.com';
+// Detecta si estás en local o en producción
+  const API_URL = ['localhost', 'www.afianzadoralaregional.com', 'afianzadoralaregional.com'].includes(window.location.hostname)
+    ? 'https://laregion.onrender.com'
+    : 'https://laregion.onrender.com'; 
+
 
   fetch(`${API_URL}/verificar`, {
     method: 'POST',
