@@ -270,3 +270,177 @@ form#login-form button:hover {
   background-color: #7f8c8d;
 }
 
+/* Contenedor general del panel */
+body {
+  font-family: Arial, sans-serif;
+  background-color: #f0f4f8;
+  margin: 20px;
+  color: #333;
+}
+
+/* Título principal */
+h1 {
+  text-align: center;
+  color: #2c3e50;
+  margin-bottom: 30px;
+}
+
+/* Botón Cerrar sesión */
+#btn-logout {
+  display: block;
+  margin: 0 auto 30px auto;
+  padding: 10px 25px;
+  background-color: #e74c3c;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  font-size: 16px;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+}
+
+#btn-logout:hover {
+  background-color: #c0392b;
+}
+
+/* Formularios */
+form {
+  background: white;
+  padding: 20px 25px;
+  margin-bottom: 30px;
+  border-radius: 8px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+  max-width: 400px;
+  margin-left: auto;
+  margin-right: auto;
+  box-sizing: border-box;
+}
+
+/* Inputs y selects dentro de los formularios */
+form input[type="text"],
+form input[type="password"],
+form select {
+  width: 100%;
+  padding: 10px 12px;
+  margin-bottom: 15px;
+  border: 1px solid #ccc;
+  border-radius: 5px;
+  font-size: 15px;
+  box-sizing: border-box;
+  transition: border-color 0.3s ease;
+}
+
+form input[type="text"]:focus,
+form input[type="password"]:focus,
+form select:focus {
+  border-color: #3498db;
+  outline: none;
+}
+
+/* Botones dentro de formularios */
+form button[type="submit"] {
+  width: 100%;
+  padding: 12px;
+  background-color: #3498db;
+  color: white;
+  font-size: 16px;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+}
+
+form button[type="submit"]:hover {
+  background-color: #2980b9;
+}
+
+/* Mensajes debajo de formularios */
+#mensaje-agregar,
+#mensaje-contrasena {
+  margin-top: 8px;
+  font-weight: bold;
+  text-align: center;
+}
+
+/* Línea horizontal */
+hr {
+  max-width: 600px;
+  margin: 40px auto;
+  border: none;
+  border-top: 1px solid #ccc;
+}
+
+/* Títulos secundarios */
+h2 {
+  text-align: center;
+  color: #34495e;
+  margin-bottom: 20px;
+  max-width: 600px;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+/* Tabla lista de números */
+table#tabla-estados {
+  width: 90%;
+  max-width: 700px;
+  margin: 0 auto 50px auto;
+  border-collapse: collapse;
+  background: white;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+table#tabla-estados th,
+table#tabla-estados td {
+  padding: 12px 15px;
+  text-align: center;
+  border-bottom: 1px solid #ddd;
+}
+
+table#tabla-estados th {
+  background-color: #3498db;
+  color: white;
+  font-weight: 600;
+}
+
+table#tabla-estados tr:hover {
+  background-color: #f1f9ff;
+}
+
+/* Botones dentro de la tabla para actualizar estado */
+table#tabla-estados button {
+  background-color: #27ae60;
+  color: white;
+  padding: 6px 12px;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  font-size: 14px;
+  transition: background-color 0.3s ease;
+}
+
+table#tabla-estados button:hover {
+  background-color: #1e8449;
+}
+
+/* Select dentro de la tabla */
+table#tabla-estados select {
+  padding: 5px 8px;
+  border-radius: 5px;
+  border: 1px solid #ccc;
+  font-size: 14px;
+}
+
+/* Responsive para pantallas pequeñas */
+@media (max-width: 480px) {
+  form, table#tabla-estados {
+    width: 95%;
+  }
+  #btn-logout {
+    width: 95%;
+    font-size: 14px;
+  }
+}
+
