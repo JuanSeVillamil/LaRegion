@@ -175,14 +175,30 @@ button:hover {
   height: auto;
 }
 
+/* Contenedor del login centrado en la página */
 .login-container {
   display: flex;
   justify-content: center;
   align-items: center;
   height: 100vh;
   padding: 20px;
+  box-sizing: border-box;
+  position: relative;
 }
 
+/* Logo arriba a la izquierda */
+.logo-login {
+  position: absolute;
+  top: 20px;
+  left: 20px;
+}
+
+.logo-login img {
+  width: 120px;
+  height: auto;
+}
+
+/* Formulario de login */
 form#login-form {
   background: white;
   padding: 30px 40px;
@@ -196,5 +212,39 @@ form#login-form {
 form#login-form h1 {
   text-align: center;
   margin-bottom: 20px;
+  font-size: 24px;
+  color: #2c3e50;
 }
 
+/* Inputs y botón con el mismo ancho */
+form#login-form input[type="text"],
+form#login-form input[type="password"],
+form#login-form button {
+  width: 100%;
+  padding: 12px;
+  margin-bottom: 15px;
+  border-radius: 5px;
+  font-size: 16px;
+  box-sizing: border-box;
+  border: 1px solid #ccc;
+}
+
+/* Estilo del botón */
+form#login-form button {
+  background-color: #3498db;
+  color: white;
+  border: none;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+}
+
+form#login-form button:hover {
+  background-color: #2980b9;
+}
+
+/* Mensaje de error */
+#mensaje-error {
+  text-align: center;
+  margin-top: 10px;
+  color: red;
+}
