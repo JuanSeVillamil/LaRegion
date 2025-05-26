@@ -8,7 +8,6 @@ function verificarNumero() {
     return;
   }
 
-  // Detecta si estás en local o en producción
   const API_URL = window.location.hostname === 'localhost'
     ? 'http://localhost:3000'
     : 'https://laregion.onrender.com';
@@ -21,11 +20,17 @@ function verificarNumero() {
   .then(response => response.json())
   .then(data => {
     if (data.estado === "Aprobado") {
-      mensaje.textContent = "✅ Aprobado";
-      mensaje.style.color = "green";
+      mensaje.innerHTML = `
+        <p style="color: green;">✅ Aprobado</p>
+        <p><strong>Tomador:</strong> ${data.tomador || 'N/A'}</p>
+        <p><strong>Asegurado:</strong> ${data.asegurado || 'N/A'}</p>
+      `;
     } else if (data.estado === "No aprobado") {
-      mensaje.textContent = "❌ No Aprobado";
-      mensaje.style.color = "red";
+      mensaje.innerHTML = `
+        <p style="color: red;">❌ No Aprobado</p>
+        <p><strong>Tomador:</strong> ${data.tomador || 'N/A'}</p>
+        <p><strong>Asegurado:</strong> ${data.asegurado || 'N/A'}</p>
+      `;
     } else {
       mensaje.textContent = "⚠️ Número no encontrado";
       mensaje.style.color = "orange";

@@ -108,24 +108,26 @@ app.post('/cambiar-contrasena', protegerRuta, async (req, res) => {
   }
 });
 
-app.post('/agregar', protegerRuta, async (req, res) => {
-  const { numero, estado } = req.body;
-
-  if (!numero || !estado) {
-    return res.status(400).json({ exito: false, mensaje: 'Datos incompletos' });
-  }
+app.post('/agregar', async (req, res) => {
+  const { numero, estado, tomador, asegurado } = req.body;
 
   try {
-    await pool.query(`
-      INSERT INTO estados (numero, estado)
-      VALUES ($1, $2)
-      ON CONFLICT (numero)
-      DO UPDATE SET estado = EXCLUDED.estado
-    `, [numero, estado]);
+    // Usando SQL con parámetros para evitar inyección
+    const query = `
+      INSERT INTO tu_tabla (numero, estado, tomador, asegurado)
+      VALUES ($1, $2, $3, $4)
+      ON CONFLICT (numero) DO UPDATE SET
+        estado = EXCLUDED.estado,
+        tomador = EXCLUDED.tomador,
+        asegurado = EXCLUDED.asegurado;
+    `;
+
+    await pool.query(query, [numero, estado, tomador, asegurado]);
 
     res.json({ exito: true });
-  } catch (err) {
-    res.status(500).json({ exito: false, mensaje: 'Error al insertar' });
+  } catch (error) {
+    console.error('Error en /agregar:', error);
+    res.json({ exito: false, mensaje: error.message });
   }
 });
 
@@ -144,14 +146,15 @@ app.post('/verificar', async (req, res) => {
   }
 });
 
-app.get('/todos', protegerRuta, async (req, res) => {
+app.get('/todos', async (req, res) => {
   try {
-    const result = await pool.query('SELECT numero, estado FROM estados');
+    const result = await pool.query('SELECT numero, estado, tomador, asegurado FROM estados');
     res.json(result.rows);
-  } catch (err) {
+  } catch (error) {
     res.status(500).json({ error: 'Error al obtener datos' });
   }
 });
+
 
 app.post('/logout', (req, res) => {
   req.session.destroy(err => {
