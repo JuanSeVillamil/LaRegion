@@ -9,7 +9,7 @@
 <body>
   <!-- Logo -->
   <div class="logo-login">
-    <img src="media/logo.png" alt="Logo">
+    <img src="media/logo.png" alt="Logo" />
   </div>
 
   <!-- Formulario de Login -->
@@ -21,6 +21,9 @@
       <button type="submit">Ingresar</button>
       <p id="mensaje-error" style="color:red;"></p>
     </form>
+
+    <!-- Botón volver al inicio -->
+    <button id="btn-volver" class="btn-volver">Volver al inicio</button>
   </div>
 
   <script>
@@ -43,6 +46,10 @@
       } else {
         mensajeError.textContent = 'Usuario o contraseña incorrectos';
       }
+    });
+
+    document.getElementById('btn-volver').addEventListener('click', () => {
+      window.location.href = 'index.html'; // Ajusta esta URL si quieres otro destino
     });
   </script>
 </body>
