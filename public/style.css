@@ -1,171 +1,115 @@
-body {
-  font-family: Arial, sans-serif;
-  background-color: #f4f4f4;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  height: 100vh;
-  margin: 0;
-}
-
-.container {
-  background-color: white;
-  padding: 30px;
-  border-radius: 10px;
-  box-shadow: 0 4px 8px rgba(0,0,0,0.1);
-  text-align: center;
-  width: 300px;
-}
-
-input[type="text"] {
-  width: 100%;
-  padding: 10px;
-  margin-top: 10px;
-  margin-bottom: 15px;
-  border: 1px solid #ccc;
-  border-radius: 5px;
-}
-
-button {
-  background-color: #007bff;
-  color: white;
-  padding: 10px 15px;
-  border: none;
-  border-radius: 5px;
-  cursor: pointer;
-}
-
-button:hover {
-  background-color: #0056b3;
-}
-
-#mensajeResultado {
-  font-weight: bold;
-  margin-top: 15px;
-}
-
-/* style.css */
-
 /* Estilos generales */
-body {
-  font-family: Arial, sans-serif;
-  background: #f0f4f8;
-  color: #333;
+* {
+  box-sizing: border-box;
   margin: 0;
-  padding: 20px;
+  padding: 0;
+}
+
+body {
+  font-family: 'Segoe UI', sans-serif;
+  background: url('media/fondo.jpg') no-repeat center center fixed;
+  background-size: cover;
+  min-height: 100vh;
   display: flex;
-  justify-content: center;
-  align-items: center;
-  height: 100vh;
   flex-direction: column;
+  align-items: center;
 }
 
-/* Contenedor para login y panel */
-form {
-  background: white;
-  padding: 25px 30px;
-  border-radius: 8px;
-  box-shadow: 0 2px 8px rgba(0,0,0,0.15);
-  width: 320px;
-  box-sizing: border-box;
-}
-
-/* Título */
-h1 {
-  margin-bottom: 20px;
-  color: #2c3e50;
-  text-align: center;
-}
-
-/* Inputs */
-input[type="text"],
-input[type="password"],
-select {
+/* Barra superior con logo y login */
+.top-bar {
   width: 100%;
-  padding: 10px 12px;
-  margin-bottom: 15px;
-  border: 1px solid #ccc;
-  border-radius: 5px;
-  box-sizing: border-box;
-  font-size: 16px;
-  transition: border-color 0.3s ease;
+  padding: 15px 30px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background: rgba(255, 255, 255, 0.8);
+  position: sticky;
+  top: 0;
+  z-index: 100;
 }
 
-input[type="text"]:focus,
-input[type="password"]:focus,
-select:focus {
-  border-color: #3498db;
-  outline: none;
-}
-
-/* Botones */
-button {
-  width: 100%;
-  padding: 12px;
-  background-color: #3498db;
-  color: white;
-  font-size: 16px;
-  border: none;
-  border-radius: 5px;
-  cursor: pointer;
-  transition: background-color 0.3s ease;
-}
-
-button:hover {
-  background-color: #2980b9;
-}
-
-/* Mensajes de error */
-#mensaje-error {
-  text-align: center;
-  margin-top: 10px;
-}
-
-/* Tabla panel administrador */
-table {
-  border-collapse: collapse;
-  width: 100%;
-  margin-top: 20px;
-  background: white;
-  box-shadow: 0 2px 8px rgba(0,0,0,0.1);
-  border-radius: 8px;
-  overflow: hidden;
-}
-
-th, td {
-  text-align: left;
-  padding: 12px 15px;
-  border-bottom: 1px solid #ddd;
-}
-
-th {
-  background-color: #3498db;
-  color: white;
-}
-
-tr:hover {
-  background-color: #f1f9ff;
-}
-
-h2 {
-  margin-top: 2rem;
+.logo {
+  height: 50px;
 }
 
 .btn-login {
-  position: fixed;
-  top: 20px;
-  left: 20px;
-  background-color: #007BFF;
-  color: white;
-  padding: 8px 14px;
-  border-radius: 5px;
   text-decoration: none;
+  background-color: #007bff;
+  color: white;
+  padding: 10px 20px;
+  border-radius: 8px;
+  transition: background 0.3s;
   font-weight: bold;
-  box-shadow: 0 2px 6px rgba(0,0,0,0.2);
-  transition: background-color 0.3s ease;
-  z-index: 1000;
 }
 
 .btn-login:hover {
   background-color: #0056b3;
+}
+
+/* Contenedor principal */
+.container {
+  background-color: rgba(255, 255, 255, 0.95);
+  margin-top: 60px;
+  padding: 40px 30px;
+  border-radius: 16px;
+  box-shadow: 0 0 15px rgba(0,0,0,0.3);
+  text-align: center;
+  max-width: 400px;
+  width: 90%;
+}
+
+.container h1 {
+  margin-bottom: 20px;
+  font-size: 1.6rem;
+}
+
+/* Input del número */
+#numeroInput {
+  width: 100%;
+  padding: 12px;
+  font-size: 1rem;
+  margin-bottom: 15px;
+  border: 1px solid #ccc;
+  border-radius: 8px;
+}
+
+/* Botón verificar */
+button {
+  width: 100%;
+  padding: 12px;
+  font-size: 1rem;
+  background-color: #28a745;
+  border: none;
+  color: white;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: background 0.3s;
+}
+
+button:hover {
+  background-color: #218838;
+}
+
+/* Resultado del mensaje */
+#mensajeResultado {
+  margin-top: 20px;
+  font-weight: bold;
+  font-size: 1.1rem;
+}
+
+/* Adaptación móvil */
+@media (max-width: 480px) {
+  .top-bar {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .btn-login {
+    margin-top: 10px;
+    align-self: flex-end;
+  }
+
+  .container {
+    padding: 25px 20px;
+  }
 }
