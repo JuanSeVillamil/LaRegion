@@ -135,13 +135,15 @@ app.post('/verificar', async (req, res) => {
   const { numero } = req.body;
 
   try {
-    const result = await pool.query('SELECT estado FROM estados WHERE numero = $1', [numero]);
+    const result = await pool.query('SELECT estado, tomador, asegurado FROM estados WHERE numero = $1', [numero]);
     if (result.rows.length > 0) {
-      res.json({ estado: result.rows[0].estado });
+      const { estado, tomador, asegurado } = result.rows[0];
+      res.json({ estado, tomador, asegurado });
     } else {
-      res.json({ estado: 'No aprobado' });
+      res.json({ estado: 'No aprobado' }); // O puedes usar estado: 'No encontrado'
     }
   } catch (err) {
+    console.error(err);
     res.status(500).json({ mensaje: 'Error en la base de datos' });
   }
 });
