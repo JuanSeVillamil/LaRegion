@@ -506,11 +506,11 @@ table#tabla-estados select {
   font-size: 1.3rem;
   font-weight: bold;
   margin-top: 12px;
-  color: #28a745; /* verde aprobado */
+  color: #00d432; /* verde aprobado */
 }
 
 .estado-final.rechazado {
-  color: #c0392b; /* rojo rechazado */
+  color: #ff1900; /* rojo rechazado */
 }
 
 .resultado-item {
