@@ -499,3 +499,10 @@ table#tabla-estados select {
 .valor {
   font-weight: normal;
 }
+
+
+#infoAdicional p {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}

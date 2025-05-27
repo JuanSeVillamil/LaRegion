@@ -30,7 +30,7 @@ function verificarNumero() {
         return str.replace(/\b\w/g, c => c.toUpperCase());
       }
 
-      // Mostrar estado aprobado o no aprobado, más grande
+      // Mostrar estado aprobado o no aprobado
       if (data.estado === "Aprobado") {
         mensaje.textContent = "✅ APROBADO";
         mensaje.style.color = "green";
@@ -48,15 +48,27 @@ function verificarNumero() {
         mensaje.style.fontSize = "1.1rem";
       }
 
-      // Mostrar datos adicionales en líneas con formato:
+      // Mostrar datos adicionales
       if (data.contratante || data.beneficiario || data.contratante_direccion || data.contratante_ciudad || data.fecha_expedicion) {
         infoBox.style.display = "block";
+
+        // Formatea la fecha si existe
+        let fechaFormateada = '---';
+        if (data.fecha_expedicion) {
+          const fecha = new Date(data.fecha_expedicion);
+          fechaFormateada = fecha.toLocaleDateString('es-CO', {
+            day: '2-digit',
+            month: '2-digit',
+            year: 'numeric'
+          });
+        }
+
         infoBox.innerHTML = `
           <div class="resultado-item"><span class="etiqueta">Contratante:</span> <span class="valor">${capitalizarNombre(data.contratante || '---')}</span></div>
           <div class="resultado-item"><span class="etiqueta">Beneficiario:</span> <span class="valor">${capitalizarNombre(data.beneficiario || '---')}</span></div>
           <div class="resultado-item"><span class="etiqueta">Dirección:</span> <span class="valor">${data.contratante_direccion || '---'}</span></div>
           <div class="resultado-item"><span class="etiqueta">Ciudad:</span> <span class="valor">${capitalizarNombre(data.contratante_ciudad || '---')}</span></div>
-          <div class="resultado-item"><span class="etiqueta">Fecha de expedición:</span> <span class="valor">${data.fecha_expedicion || '---'}</span></div>
+          <div class="resultado-item"><span class="etiqueta">Fecha de expedición:</span> <span class="valor">${fechaFormateada}</span></div>
         `;
       } else {
         infoBox.style.display = "none";
