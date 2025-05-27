@@ -33,7 +33,7 @@ function verificarNumero() {
       // Mostrar estado aprobado o no aprobado
       if (data.estado === "Aprobado") {
         mensaje.textContent = "✅ APROBADO";
-        mensaje.style.color = "#36ff00";
+        mensaje.style.color = "#greenapple";
         mensaje.style.fontWeight = "bold";
         mensaje.style.fontSize = "1.4rem";
       } else if (data.estado === "No aprobado") {
