@@ -6,13 +6,14 @@
 }
 
 body {
-  font-family: 'Segoe UI', sans-serif;
-  background: url('media/fondo.jpg') no-repeat center center fixed;
+  font-family: 'FangSong', serif;
+  background: url('media/fondo(2).jpg') no-repeat center center fixed;
   background-size: cover;
   min-height: 100vh;
   display: flex;
   flex-direction: column;
   align-items: center;
+
 }
 
 /* Barra superior con logo y login */
@@ -20,12 +21,20 @@ body {
   width: 100%;
   padding: 15px 30px;
   display: flex;
-  justify-content: space-between;
+  justify-content: center; /* Centra el logo horizontalmente */
   align-items: center;
-  background: rgba(255, 255, 255, 0.8);
+  background: rgba(54, 47, 47, 0.5);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
   position: sticky;
   top: 0;
-  z-index: 100;
+  z-index: 1000;
+  position: relative;
+}
+
+.logo-container {
+  text-align: center;
+  flex-grow: 1;
 }
 
 .logo {
@@ -33,12 +42,12 @@ body {
 }
 
 .btn-login {
+  position: absolute;
+  right: 30px;
+  top: 50%;
+  transform: translateY(-50%);
   text-decoration: none;
-  background-color: #007bff;
   color: white;
-  padding: 10px 20px;
-  border-radius: 8px;
-  transition: background 0.3s;
   font-weight: bold;
 }
 
@@ -56,11 +65,17 @@ body {
   text-align: center;
   max-width: 400px;
   width: 90%;
+  background: rgba(54, 47, 47, 0.5); /* Fondo blanco semi-transparente */
+  backdrop-filter: blur(8px); /* Difuminado */
+  -webkit-backdrop-filter: blur(8px); /* Compatibilidad con Safari */
+  font-family: 'FangSong', serif;
 }
 
 .container h1 {
   margin-bottom: 20px;
   font-size: 1.6rem;
+  color: white;
+  font-family: 'FangSong', serif;
 }
 
 /* Input del número */
@@ -71,6 +86,7 @@ body {
   margin-bottom: 15px;
   border: 1px solid #ccc;
   border-radius: 8px;
+  font-family: 'FangSong', serif;
 }
 
 /* Botón verificar */
@@ -78,12 +94,13 @@ button {
   width: 100%;
   padding: 12px;
   font-size: 1rem;
-  background-color: #28a745;
+  background-color: #0f2338;
   border: none;
   color: white;
   border-radius: 8px;
   cursor: pointer;
   transition: background 0.3s;
+  font-family: 'FangSong', serif;
 }
 
 button:hover {
@@ -95,6 +112,7 @@ button:hover {
   margin-top: 20px;
   font-weight: bold;
   font-size: 1.1rem;
+  font-family: 'FangSong', serif;
 }
 
 /* Adaptación móvil */
@@ -122,12 +140,17 @@ button:hover {
   text-align: center;
   max-width: 600px;
   width: 90%;
+  background: rgba(54, 47, 47, 0.5); /* Fondo blanco semi-transparente */
+  backdrop-filter: blur(8px); /* Difuminado */
+  -webkit-backdrop-filter: blur(8px); /* Compatibilidad con Safari */
   box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+  font-family: 'FangSong', serif;
 }
 
 .contacto h2 {
   margin-bottom: 15px;
-  color: #2c3e50;
+  color: #ececec;
+  font-family: 'FangSong', serif;
 }
 
 .contacto p {
@@ -137,6 +160,8 @@ button:hover {
   align-items: center;
   justify-content: center;
   gap: 10px;
+  color: #e4e4e4;
+  font-family: 'FangSong', serif;
 }
 
 .contacto i {
@@ -153,6 +178,7 @@ button:hover {
   text-decoration: none;
   font-size: 16px;
   transition: color 0.3s ease;
+  font-family: 'FangSong', serif;
 }
 
 .whatsapp-link i {
@@ -517,45 +543,26 @@ table#tabla-estados select {
 }
 
 .quienes-somos h2 {
-  color: #2c3e50;
+  color: #f5f5f5;
   margin-bottom: 10px;
+  font-family: 'FangSong', serif;
 }
 
 .quienes-somos p {
-  font-size: 1rem;
-  color: #333;
-}
-
-body {
-  margin: 0;
-  padding: 0;
+  font-size: 2rem;
+  color: #ffffff;
   font-family: 'FangSong', serif;
-  background: url('media/fondo.jpg') no-repeat center center fixed; /* O usa un color si no quieres imagen */
-  background-size: cover;
-  height: 100vh;
-  overflow-y: auto;
-  position: relative;
 }
 
-body::before {
-  content: "";
-  position: fixed;
-  top: 0;
-  left: 0;
-  height: 100%;
-  width: 100%;
-  backdrop-filter: blur(8px); /* Aplica el desenfoque */
-  -webkit-backdrop-filter: blur(8px);
-  z-index: -1;
-}
 
-.container, .quienes-somos {
-  background: rgba(255, 255, 255, 0.9); /* Fondo blanco semitransparente */
-  border-radius: 12px;
+.quienes-somos {
+  background: rgba(54, 47, 47, 0.5); /* Fondo blanco semi-transparente */
+  backdrop-filter: blur(8px); /* Difuminado */
+  -webkit-backdrop-filter: blur(8px); /* Compatibilidad con Safari */
+  border-radius: 10px;
   padding: 20px;
   margin: 20px auto;
   max-width: 800px;
-  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.2);
-  position: relative;
-  z-index: 1;
+  text-align: center;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
 }
