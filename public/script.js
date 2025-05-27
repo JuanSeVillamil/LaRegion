@@ -1,6 +1,12 @@
 function verificarNumero() {
   const numero = document.getElementById("numeroInput").value.trim();
   const mensaje = document.getElementById("mensajeResultado");
+  const infoBox = document.getElementById("infoAdicional");
+
+  // Limpia resultados anteriores
+  mensaje.textContent = "";
+  infoBox.style.display = "none";
+  infoBox.innerHTML = ""; // Limpiar contenido previo
 
   if (numero === "") {
     mensaje.textContent = "Por favor ingresa un número.";
@@ -8,40 +14,57 @@ function verificarNumero() {
     return;
   }
 
-// Detecta si estás en local o en producción
   const API_URL = ['localhost', 'www.afianzadoralaregional.com', 'afianzadoralaregional.com'].includes(window.location.hostname)
     ? 'https://laregion.onrender.com'
-    : 'https://laregion.onrender.com'; 
-
+    : 'https://laregion.onrender.com';
 
   fetch(`${API_URL}/verificar`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ numero })
   })
-  .then(response => response.json())
-  .then(data => {
-    if (data.estado === "Aprobado") {
-      mensaje.innerHTML = `
-        <p style="color: green;">✅ Aprobado</p>
-        <p><strong>Tomador:</strong> ${data.tomador || 'N/A'}</p>
-        <p><strong>Asegurado:</strong> ${data.asegurado || 'N/A'}</p>
-      `;
-    } else if (data.estado === "No aprobado") {
-      mensaje.innerHTML = `
-        <p style="color: red;">❌ No Aprobado</p>
-        <p><strong>Tomador:</strong> ${data.tomador || 'N/A'}</p>
-        <p><strong>Asegurado:</strong> ${data.asegurado || 'N/A'}</p>
-      `;
-    } else {
-      mensaje.textContent = "⚠️ Número no encontrado";
-      mensaje.style.color = "orange";
-    }
-  })
-  .catch(error => {
-    console.error("Error al consultar:", error);
-    mensaje.textContent = "Error al conectar con el servidor.";
-    mensaje.style.color = "red";
-  });
-}
+    .then(response => response.json())
+    .then(data => {
+      // Función para capitalizar cada palabra
+      function capitalizarNombre(str = '') {
+        return str.replace(/\b\w/g, c => c.toUpperCase());
+      }
 
+      // Mostrar estado aprobado o no aprobado, más grande
+      if (data.estado === "Aprobado") {
+        mensaje.textContent = "✅ APROBADO";
+        mensaje.style.color = "green";
+        mensaje.style.fontWeight = "bold";
+        mensaje.style.fontSize = "1.4rem";
+      } else if (data.estado === "No aprobado") {
+        mensaje.textContent = "❌ NO APROBADO";
+        mensaje.style.color = "red";
+        mensaje.style.fontWeight = "bold";
+        mensaje.style.fontSize = "1.4rem";
+      } else {
+        mensaje.textContent = "⚠️ Número no encontrado";
+        mensaje.style.color = "orange";
+        mensaje.style.fontWeight = "normal";
+        mensaje.style.fontSize = "1.1rem";
+      }
+
+      // Mostrar datos adicionales en líneas con formato:
+      if (data.contratante || data.beneficiario || data.contratante_direccion || data.contratante_ciudad || data.fecha_expedicion) {
+        infoBox.style.display = "block";
+        infoBox.innerHTML = `
+          <div class="resultado-item"><span class="etiqueta">Contratante:</span> <span class="valor">${capitalizarNombre(data.contratante || '---')}</span></div>
+          <div class="resultado-item"><span class="etiqueta">Beneficiario:</span> <span class="valor">${capitalizarNombre(data.beneficiario || '---')}</span></div>
+          <div class="resultado-item"><span class="etiqueta">Dirección:</span> <span class="valor">${data.contratante_direccion || '---'}</span></div>
+          <div class="resultado-item"><span class="etiqueta">Ciudad:</span> <span class="valor">${capitalizarNombre(data.contratante_ciudad || '---')}</span></div>
+          <div class="resultado-item"><span class="etiqueta">Fecha de expedición:</span> <span class="valor">${data.fecha_expedicion || '---'}</span></div>
+        `;
+      } else {
+        infoBox.style.display = "none";
+      }
+    })
+    .catch(error => {
+      console.error("Error al consultar:", error);
+      mensaje.textContent = "Error al conectar con el servidor.";
+      mensaje.style.color = "red";
+    });
+}

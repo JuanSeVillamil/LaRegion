@@ -29,7 +29,7 @@ body {
 }
 
 .logo {
-  height: 80px;
+  height: 100px;
 }
 
 .btn-login {
@@ -444,3 +444,58 @@ table#tabla-estados select {
   }
 }
 
+/* Estilo para capitalizar nombres */
+.nombre-propio {
+  text-transform: capitalize;
+  font-weight: normal; /* No en negrita */
+}
+
+/* Estilo para los ítems o etiquetas */
+.etiqueta {
+  font-weight: bold;
+}
+
+/* Estilo más grande para el resultado */
+.estado-aprobado, .estado-rechazado {
+  font-size: 1.4rem;
+  font-weight: bold;
+}
+
+.resultado-item {
+  margin-bottom: 8px;
+  font-size: 1rem;
+  line-height: 1.5;
+}
+
+.resultado-item .etiqueta {
+  font-weight: bold;
+}
+
+.resultado-item .valor {
+  font-weight: normal;
+  text-transform: capitalize;
+}
+
+.estado-final {
+  font-size: 1.3rem;
+  font-weight: bold;
+  margin-top: 12px;
+  color: #28a745; /* verde aprobado */
+}
+
+.estado-final.rechazado {
+  color: #c0392b; /* rojo rechazado */
+}
+
+.resultado-item {
+  margin: 6px 0;
+  font-size: 1rem;
+}
+
+.etiqueta {
+  font-weight: bold;
+}
+
+.valor {
+  font-weight: normal;
+}

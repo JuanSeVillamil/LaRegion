@@ -115,20 +115,38 @@ app.post('/cambiar-contrasena', protegerRuta, async (req, res) => {
 });
 
 app.post('/agregar', async (req, res) => {
-  const { numero, estado, tomador, asegurado } = req.body;
+  const {
+    numero,
+    estado,
+    contratante,
+    beneficiario,
+    contratante_direccion,
+    contratante_ciudad,
+    fecha_expedicion
+  } = req.body;
 
   try {
-    // Usando SQL con parámetros para evitar inyección
     const query = `
-      INSERT INTO estados (numero, estado, tomador, asegurado)
-      VALUES ($1, $2, $3, $4)
+      INSERT INTO estados (numero, estado, contratante, beneficiario, contratante_direccion, contratante_ciudad, fecha_expedicion)
+      VALUES ($1, $2, $3, $4, $5, $6, $7)
       ON CONFLICT (numero) DO UPDATE SET
         estado = EXCLUDED.estado,
-        tomador = EXCLUDED.tomador,
-        asegurado = EXCLUDED.asegurado;
+        contratante = EXCLUDED.contratante,
+        beneficiario = EXCLUDED.beneficiario,
+        contratante_direccion = EXCLUDED.contratante_direccion,
+        contratante_ciudad = EXCLUDED.contratante_ciudad,
+        fecha_expedicion = EXCLUDED.fecha_expedicion;
     `;
 
-    await pool.query(query, [numero, estado, tomador, asegurado]);
+    await pool.query(query, [
+      numero,
+      estado,
+      contratante,
+      beneficiario,
+      contratante_direccion,
+      contratante_ciudad,
+      fecha_expedicion
+    ]);
 
     res.json({ exito: true });
   } catch (error) {
@@ -141,24 +159,31 @@ app.post('/verificar', async (req, res) => {
   const { numero } = req.body;
 
   try {
-    const result = await pool.query('SELECT estado, tomador, asegurado FROM estados WHERE numero = $1', [numero]);
+    const result = await pool.query(`
+      SELECT estado, contratante, beneficiario, contratante_direccion, contratante_ciudad, fecha_expedicion
+      FROM estados
+      WHERE numero = $1
+    `, [numero]);
+
     if (result.rows.length > 0) {
-      const { estado, tomador, asegurado } = result.rows[0];
-      res.json({ estado, tomador, asegurado });
+      res.json(result.rows[0]);
     } else {
-      res.json({ estado: 'No aprobado' }); // O puedes usar estado: 'No encontrado'
+      res.json({ estado: 'No aprobado' }); // También podrías usar: { estado: 'No encontrado' }
     }
   } catch (err) {
     console.error(err);
     res.status(500).json({ mensaje: 'Error en la base de datos' });
   }
 });
-
 app.get('/todos', async (req, res) => {
   try {
-    const result = await pool.query('SELECT numero, estado, tomador, asegurado FROM estados');
+    const result = await pool.query(`
+      SELECT numero, estado, contratante, beneficiario, contratante_direccion, contratante_ciudad, fecha_expedicion
+      FROM estados
+    `);
     res.json(result.rows);
   } catch (error) {
+    console.error(error);
     res.status(500).json({ error: 'Error al obtener datos' });
   }
 });
