@@ -161,6 +161,7 @@
       data.forEach(({ numero, estado, contratante, beneficiario, contratante_direccion, contratante_ciudad, fecha_expedicion }) => {
         const fila = document.createElement('tr');
         fila.innerHTML = `
+          <td><button class="btn-eliminar" onclick="eliminarNumero('${numero}', this)">Eliminar</button></td>
           <td><input type="text" class="input-numero" value="${numero}"></td>
           <td>${estado}</td>
           <td><input type="text" class="input-contratante" value="${contratante || ''}"></td>
@@ -213,6 +214,33 @@
       alert("Error al actualizar datos");
     }
   }
+  
+    async function eliminarNumero(numero, btn) {
+    if (!confirm(`¿Seguro que quieres eliminar el número ${numero}?`)) return;
+
+    try {
+      const res = await fetch('/eliminar', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ numero })
+      });
+      const data = await res.json();
+
+      if (data.exito) {
+        alert('Número eliminado correctamente');
+        // Recargar la tabla
+        cargarNumeros();
+      } else {
+        alert('Error al eliminar número: ' + (data.mensaje || ''));
+      }
+    } catch (error) {
+      alert('Error al conectar con el servidor');
+      console.error(error);
+    }
+  }
+
+
+
   </script>
 </body>
 </html>
