@@ -181,63 +181,63 @@
       });
     }
 
-  async function actualizarEstado(numeroAntiguo, btn) {
-    const fila = btn.closest('tr');
-    const nuevoNumero = fila.querySelector('.input-numero').value.trim();
-    const estado = fila.querySelector('select').value;
-    const contratante = fila.querySelector('.input-contratante').value;
-    const beneficiario = fila.querySelector('.input-beneficiario').value;
-    const contratante_direccion = fila.querySelector('.input-direccion').value;
-    const contratante_ciudad = fila.querySelector('.input-ciudad').value;
-    const fecha_expedicion = fila.querySelector('.input-fecha').value;
+    async function actualizarEstado(numeroAntiguo, btn) {
+      const fila = btn.closest('tr');
+      const nuevoNumero = fila.querySelector('.input-numero').value.trim();
+      const estado = fila.querySelector('select').value;
+      const contratante = fila.querySelector('.input-contratante').value;
+      const beneficiario = fila.querySelector('.input-beneficiario').value;
+      const contratante_direccion = fila.querySelector('.input-direccion').value;
+      const contratante_ciudad = fila.querySelector('.input-ciudad').value;
+      const fecha_expedicion = fila.querySelector('.input-fecha').value;
 
-    const res = await fetch('/agregar', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        numero: nuevoNumero,
-        estado,
-        contratante,
-        beneficiario,
-        contratante_direccion,
-        contratante_ciudad,
-        fecha_expedicion,
-        numero_original: numeroAntiguo // se puede usar si quieres mantener referencia al número anterior
-      })
-    });
-
-    const data = await res.json();
-    if (data.exito) {
-      alert("Datos actualizados correctamente");
-      cargarNumeros();
-    } else {
-      alert("Error al actualizar datos");
-    }
-  }
-  
-    async function eliminarNumero(numero, btn) {
-    if (!confirm(`¿Seguro que quieres eliminar el número ${numero}?`)) return;
-
-    try {
-      const res = await fetch('/eliminar', {
+      const res = await fetch('/agregar', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ numero })
+        body: JSON.stringify({
+          numero: nuevoNumero,
+          estado,
+          contratante,
+          beneficiario,
+          contratante_direccion,
+          contratante_ciudad,
+          fecha_expedicion,
+          numero_original: numeroAntiguo // se puede usar si quieres mantener referencia al número anterior
+        })
       });
-      const data = await res.json();
 
+      const data = await res.json();
       if (data.exito) {
-        alert('Número eliminado correctamente');
-        // Recargar la tabla
+        alert("Datos actualizados correctamente");
         cargarNumeros();
       } else {
-        alert('Error al eliminar número: ' + (data.mensaje || ''));
+        alert("Error al actualizar datos");
       }
-    } catch (error) {
-      alert('Error al conectar con el servidor');
-      console.error(error);
     }
-  }
+  
+      async function eliminarNumero(numero, btn) {
+      if (!confirm(`¿Seguro que quieres eliminar el número ${numero}?`)) return;
+
+      try {
+        const res = await fetch('/eliminar', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ numero })
+        });
+        const data = await res.json();
+
+        if (data.exito) {
+          alert('Número eliminado correctamente');
+          // Recargar la tabla
+          cargarNumeros();
+        } else {
+          alert('Error al eliminar número: ' + (data.mensaje || ''));
+        }
+      } catch (error) {
+        alert('Error al conectar con el servidor');
+        console.error(error);
+      }
+    }
 
 
 
