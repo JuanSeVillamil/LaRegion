@@ -55,13 +55,10 @@ function verificarNumero() {
         // Formatea la fecha si existe
         let fechaFormateada = '---';
         if (data.fecha_expedicion) {
-          const fecha = new Date(data.fecha_expedicion);
-          fechaFormateada = fecha.toLocaleDateString('es-CO', {
-            day: '2-digit',
-            month: '2-digit',
-            year: 'numeric'
-          });
+          const [año, mes, día] = data.fecha_expedicion.split('T')[0].split('-');
+          fechaFormateada = `${día}/${mes}/${año}`;
         }
+
 
         infoBox.innerHTML = `
           <div class="resultado-item"><span class="etiqueta">Contratante:</span> <span class="valor">${capitalizarNombre(data.contratante || '---')}</span></div>
