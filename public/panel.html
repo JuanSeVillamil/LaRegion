@@ -4,6 +4,9 @@
   <meta charset="UTF-8">
   <title>Panel del Administrador</title>
   <link rel="stylesheet" href="style.css">
+  <style>
+
+  </style>
 </head>
 <body>
   <h1>Panel de Administración</h1>
@@ -202,7 +205,7 @@
           contratante_direccion,
           contratante_ciudad,
           fecha_expedicion,
-          numero_original: numeroAntiguo // se puede usar si quieres mantener referencia al número anterior
+          numero_original: numeroAntiguo
         })
       });
 
@@ -214,8 +217,8 @@
         alert("Error al actualizar datos");
       }
     }
-  
-      async function eliminarNumero(numero, btn) {
+
+    async function eliminarNumero(numero, btn) {
       if (!confirm(`¿Seguro que quieres eliminar el número ${numero}?`)) return;
 
       try {
@@ -228,7 +231,6 @@
 
         if (data.exito) {
           alert('Número eliminado correctamente');
-          // Recargar la tabla
           cargarNumeros();
         } else {
           alert('Error al eliminar número: ' + (data.mensaje || ''));
@@ -238,9 +240,7 @@
         console.error(error);
       }
     }
-
-
-
+    
   </script>
 </body>
 </html>
