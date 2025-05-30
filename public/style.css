@@ -569,7 +569,7 @@ table#tabla-estados select {
 }
 
 .btn-eliminar {
-  background-color: #e74c3c; /* rojo fuerte */
+  background-color: #e74c3c;
   color: white;
   border: none;
   padding: 6px 12px;
@@ -581,8 +581,9 @@ table#tabla-estados select {
 }
 
 .btn-eliminar:hover {
-  background-color: #c0392b; /* rojo más oscuro al pasar el mouse */
+  background-color: #c0392b;
 }
+
 
 .btn-eliminar:active {
   background-color: #992d22; /* rojo aún más oscuro al hacer click */
