@@ -503,12 +503,12 @@ table#tabla-estados select {
   text-transform: capitalize;
 }
 
-.estado-final.aprobado {
+.estado-final-aprobado {
   color: #09ff00; /* verde aprobado */
 }
 
 
-.estado-final.rechazado {
+.estado-final-rechazado {
   color: #ff1900; /* rojo rechazado */
 }
 
