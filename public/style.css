@@ -567,3 +567,26 @@ table#tabla-estados select {
   text-align: center;
   box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
 }
+
+.btn-eliminar {
+  background-color: #e74c3c; /* rojo fuerte */
+  color: white;
+  border: none;
+  padding: 6px 12px;
+  border-radius: 4px;
+  cursor: pointer;
+  font-weight: bold;
+  font-size: 1rem;
+  transition: background-color 0.3s ease;
+}
+
+.btn-eliminar:hover {
+  background-color: #c0392b; /* rojo más oscuro al pasar el mouse */
+}
+
+.btn-eliminar:active {
+  background-color: #992d22; /* rojo aún más oscuro al hacer click */
+  transform: scale(0.95);
+}
+
+

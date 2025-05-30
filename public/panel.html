@@ -40,6 +40,7 @@
   <table border="1" id="tabla-estados">
     <thead>
       <tr>
+        <th>Eliminar</th>
         <th>Número</th>
         <th>Estado actual</th>
         <th>Contratante</th>
@@ -160,7 +161,7 @@
       data.forEach(({ numero, estado, contratante, beneficiario, contratante_direccion, contratante_ciudad, fecha_expedicion }) => {
         const fila = document.createElement('tr');
         fila.innerHTML = `
-          <td>${numero}</td>
+          <td><input type="text" class="input-numero" value="${numero}"></td>
           <td>${estado}</td>
           <td><input type="text" class="input-contratante" value="${contratante || ''}"></td>
           <td><input type="text" class="input-beneficiario" value="${beneficiario || ''}"></td>
@@ -179,29 +180,39 @@
       });
     }
 
-    async function actualizarEstado(numero, btn) {
-      const fila = btn.closest('tr');
-      const estado = fila.querySelector('select').value;
-      const contratante = fila.querySelector('.input-contratante').value;
-      const beneficiario = fila.querySelector('.input-beneficiario').value;
-      const contratante_direccion = fila.querySelector('.input-direccion').value;
-      const contratante_ciudad = fila.querySelector('.input-ciudad').value;
-      const fecha_expedicion = fila.querySelector('.input-fecha').value;
+  async function actualizarEstado(numeroAntiguo, btn) {
+    const fila = btn.closest('tr');
+    const nuevoNumero = fila.querySelector('.input-numero').value.trim();
+    const estado = fila.querySelector('select').value;
+    const contratante = fila.querySelector('.input-contratante').value;
+    const beneficiario = fila.querySelector('.input-beneficiario').value;
+    const contratante_direccion = fila.querySelector('.input-direccion').value;
+    const contratante_ciudad = fila.querySelector('.input-ciudad').value;
+    const fecha_expedicion = fila.querySelector('.input-fecha').value;
 
-      const res = await fetch('/agregar', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ numero, estado, contratante, beneficiario, contratante_direccion, contratante_ciudad, fecha_expedicion })
-      });
+    const res = await fetch('/agregar', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        numero: nuevoNumero,
+        estado,
+        contratante,
+        beneficiario,
+        contratante_direccion,
+        contratante_ciudad,
+        fecha_expedicion,
+        numero_original: numeroAntiguo // se puede usar si quieres mantener referencia al número anterior
+      })
+    });
 
-      const data = await res.json();
-      if (data.exito) {
-        alert("Datos actualizados correctamente");
-        cargarNumeros();
-      } else {
-        alert("Error al actualizar datos");
-      }
+    const data = await res.json();
+    if (data.exito) {
+      alert("Datos actualizados correctamente");
+      cargarNumeros();
+    } else {
+      alert("Error al actualizar datos");
     }
+  }
   </script>
 </body>
 </html>

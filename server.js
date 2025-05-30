@@ -117,6 +117,7 @@ app.post('/cambiar-contrasena', protegerRuta, async (req, res) => {
 app.post('/agregar', async (req, res) => {
   const {
     numero,
+    numero_original,
     estado,
     contratante,
     beneficiario,
@@ -126,27 +127,52 @@ app.post('/agregar', async (req, res) => {
   } = req.body;
 
   try {
-    const query = `
-      INSERT INTO estados (numero, estado, contratante, beneficiario, contratante_direccion, contratante_ciudad, fecha_expedicion)
-      VALUES ($1, $2, $3, $4, $5, $6, $7)
-      ON CONFLICT (numero) DO UPDATE SET
-        estado = EXCLUDED.estado,
-        contratante = EXCLUDED.contratante,
-        beneficiario = EXCLUDED.beneficiario,
-        contratante_direccion = EXCLUDED.contratante_direccion,
-        contratante_ciudad = EXCLUDED.contratante_ciudad,
-        fecha_expedicion = EXCLUDED.fecha_expedicion;
-    `;
+    if (numero_original && numero_original !== numero) {
+      // Se cambió el número de fianza
+      await pool.query(`
+        UPDATE estados SET
+          numero = $1,
+          estado = $2,
+          contratante = $3,
+          beneficiario = $4,
+          contratante_direccion = $5,
+          contratante_ciudad = $6,
+          fecha_expedicion = $7
+        WHERE numero = $8
+      `, [
+        numero,
+        estado,
+        contratante,
+        beneficiario,
+        contratante_direccion,
+        contratante_ciudad,
+        fecha_expedicion,
+        numero_original
+      ]);
+    } else {
+      // Insertar o actualizar sin cambio de número
+      const query = `
+        INSERT INTO estados (numero, estado, contratante, beneficiario, contratante_direccion, contratante_ciudad, fecha_expedicion)
+        VALUES ($1, $2, $3, $4, $5, $6, $7)
+        ON CONFLICT (numero) DO UPDATE SET
+          estado = EXCLUDED.estado,
+          contratante = EXCLUDED.contratante,
+          beneficiario = EXCLUDED.beneficiario,
+          contratante_direccion = EXCLUDED.contratante_direccion,
+          contratante_ciudad = EXCLUDED.contratante_ciudad,
+          fecha_expedicion = EXCLUDED.fecha_expedicion;
+      `;
 
-    await pool.query(query, [
-      numero,
-      estado,
-      contratante,
-      beneficiario,
-      contratante_direccion,
-      contratante_ciudad,
-      fecha_expedicion
-    ]);
+      await pool.query(query, [
+        numero,
+        estado,
+        contratante,
+        beneficiario,
+        contratante_direccion,
+        contratante_ciudad,
+        fecha_expedicion
+      ]);
+    }
 
     res.json({ exito: true });
   } catch (error) {
@@ -154,6 +180,7 @@ app.post('/agregar', async (req, res) => {
     res.json({ exito: false, mensaje: error.message });
   }
 });
+
 
 app.post('/verificar', async (req, res) => {
   const { numero } = req.body;
@@ -201,6 +228,24 @@ app.post('/logout', (req, res) => {
   });
 });
 
+app.post('/eliminar', protegerRuta, async (req, res) => {
+  const { numero } = req.body;
+
+  try {
+    const result = await pool.query('DELETE FROM estados WHERE numero = $1', [numero]);
+    if (result.rowCount > 0) {
+      res.json({ exito: true });
+    } else {
+      res.json({ exito: false, mensaje: 'Registro no encontrado' });
+    }
+  } catch (error) {
+    console.error('Error en /eliminar:', error);
+    res.status(500).json({ exito: false, mensaje: 'Error en la base de datos' });
+  }
+});
+
+
 app.listen(PORT, () => {
   console.log(`🚀 Servidor corriendo en http://localhost:${PORT}`);
 });
+
