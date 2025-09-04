@@ -1,0 +1,189 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8" />
+  <title>Certificado de Fianza</title>
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <style>
+    /* estilos inline mínimos para que funcione aun sin el CSS externo */
+    body { font-family: "Times New Roman", Georgia, serif; color:#222; margin:0; padding:0; }
+    .marca-agua { position: fixed; inset: 0; background-repeat: no-repeat; background-position: center; background-size: 70%; opacity: 0.06; z-index: 0; }
+    .page { padding: 20mm 15mm; box-sizing: border-box; position: relative; z-index: 1; }
+    .encabezado { display:flex; gap:12px; align-items:center; border-bottom: 1px solid #444; padding-bottom:8px; margin-bottom:10px; }
+    .encabezado img { height: 70px; }
+    .titulo-cert { text-align:center; font-size:18px; margin:8px 0; font-weight:700; }
+    .cert-num { text-align:center; font-size:12px; color:#333; margin-bottom:6px; }
+    .bloque { border:1px solid #ddd; padding:8px 10px; border-radius:6px; margin-bottom:10px; background:#fff; }
+    .fila { display:flex; gap:10px; }
+    .fila > div { flex:1; font-size:12px; }
+    .lbl { font-weight:700; display:inline-block; width:120px; }
+    table { width:100%; border-collapse: collapse; font-size:12px; margin-top:6px; }
+    table th, table td { border:1px solid #ccc; padding:6px; text-align:center; }
+    .firmas { display:flex; gap:30px; justify-content:flex-end; margin-top:12px; }
+    .firma { text-align:center; width:200px; }
+    .linea { border-bottom:1px solid #333; height:40px; margin-bottom:6px; }
+    .nota, .pie { font-size:10px; color:#555; text-align:center; margin-top:8px; }
+  </style>
+</head>
+<body>
+  <% if (watermarkDataUrl) { %>
+    <div class="marca-agua" style="background-image: url('<%= watermarkDataUrl %>');"></div>
+  <% } %>
+
+  <div class="page">
+    <header class="encabezado">
+      <div class="logo">
+        <% if (logoDataUrl) { %>
+          <img src="<%= logoDataUrl %>" alt="Logo">
+        <% } %>
+      </div>
+      <div style="flex:1;">
+        <h2 style="margin:0;"><strong>Agencia de Afianzamiento LA REGIONAL</strong></h2>
+        <div style="font-size:11px; color:#444;">NIT: 123.456.789-0 • Santa Marta, Colombia</div>
+        <div style="font-size:11px; color:#444;">Tel: +57 310 717 4550 • www.afianzadoralaregional.com</div>
+      </div>
+      <div style="text-align:right; font-size:12px;">
+        <div><strong><%= ciudad_expedicion || '' %></strong></div>
+        <div><%= fecha_expedicion || '' %></div>
+        <div style="margin-top:6px;">Fianza N° <strong><%= documento_fianza || '---' %></strong></div>
+        <div>Anexo N° <strong><%= anexo || '0' %></strong></div>
+      </div>
+    </header>
+
+    <h3 class="titulo-cert">FIANZA DE CUMPLIMIENTO</h3>
+    <div class="cert-num">No. <strong><%= documento_fianza || '---' %></strong></div>
+
+    <section class="bloque datos-basicos">
+      <div class="fila">
+        <div><span class="lbl">Contratante:</span> <span><%= contratante || '---' %></span></div>
+        <div><span class="lbl">NIT:</span> <span><%= contratante_nit || '---' %></span></div>
+      </div>
+      <div class="fila">
+        <div><span class="lbl">Dirección:</span> <span><%= contratante_direccion || '---' %></span></div>
+        <div><span class="lbl">Teléfono:</span> <span><%= contratante_tel || '---' %></span></div>
+      </div>
+
+      <hr style="border:none; margin:6px 0; border-top:1px dashed #ddd;" />
+
+      <div class="fila">
+        <div><span class="lbl">Afianzado:</span> <span><%= afianzado || '---' %></span></div>
+        <div><span class="lbl">NIT:</span> <span><%= afianzado_nit || '---' %></span></div>
+      </div>
+      <div class="fila">
+        <div><span class="lbl">Dirección:</span> <span><%= afianzado_direccion || '---' %></span></div>
+        <div><span class="lbl">Teléfono:</span> <span><%= afianzado_tel || '---' %></span></div>
+      </div>
+
+      <hr style="border:none; margin:6px 0; border-top:1px dashed #ddd;" />
+
+      <div class="fila">
+        <div><span class="lbl">Beneficiario:</span> <span><%= beneficiario || '---' %></span></div>
+        <div><span class="lbl">NIT:</span> <span><%= beneficiario_nit || '---' %></span></div>
+      </div>
+      <div class="fila">
+        <div><span class="lbl">Dirección:</span> <span><%= beneficiario_direccion || '---' %></span></div>
+        <div><span class="lbl">Teléfono:</span> <span><%= beneficiario_tel || '---' %></span></div>
+      </div>
+    </section>
+
+    <section class="bloque objeto">
+      <h4 style="margin:6px 0 8px 0;">Objeto</h4>
+      <p style="font-size:12px; line-height:1.4;"><%= objeto || '---' %></p>
+    </section>
+
+    <section class="bloque">
+      <h4 style="margin:6px 0 8px 0;">Observaciones</h4>
+      <p><%= observaciones || '---' %></p>
+    </section>
+
+    <section class="bloque">
+      <div class="fila">
+        <div><span class="lbl">Valor Contrato:</span> <span><%= valor_contrato || '---' %></span></div>
+        <div><span class="lbl">Clase de contrato:</span> <span><%= clase_contrato || '---' %></span></div>
+      </div>
+      <div class="fila" style="margin-top:8px;">
+        <div><span class="lbl">Pagaré N°:</span> <span><%= pagare || '---' %></span></div>
+      </div>
+    </section>
+
+    <section class="bloque">
+      <h4 style="margin:6px 0;">Fianzas</h4>
+      <table>
+        <thead>
+          <tr>
+            <th>Tipo</th>
+            <th>Valor Afianzado</th>
+            <th>Desde</th>
+            <th>Hasta</th>
+          </tr>
+        </thead>
+        <tbody>
+          <% if (fianzas && fianzas.length) { %>
+            <% fianzas.forEach(f => { %>
+              <tr>
+                <td><%= f.tipo || '---' %></td>
+                <td><%= f.valor || '---' %></td>
+                <td><%= f.desde ? (new Date(f.desde)).toLocaleDateString('es-ES') : '---' %></td>
+                <td><%= f.hasta ? (new Date(f.hasta)).toLocaleDateString('es-ES') : '---' %></td>
+              </tr>
+            <% }) %>
+          <% } else { %>
+            <tr><td colspan="4">---</td></tr>
+          <% } %>
+        </tbody>
+      </table>
+    </section>
+
+    <section class="bloque">
+      <div class="fila">
+        <div><span class="lbl">Total Afianzado:</span> <span><%= total_afianzado || '---' %></span></div>
+        <div><span class="lbl">Costo neto:</span> <span><%= costo_neto || '---' %></span></div>
+      </div>
+      <div class="fila" style="margin-top:6px;">
+        <div><span class="lbl">Costos admin:</span> <span><%= costos_admin || '---' %></span></div>
+        <div><span class="lbl">IVA:</span> <span><%= iva || '---' %></span></div>
+      </div>
+      <div class="fila" style="margin-top:6px;">
+        <div><span class="lbl">Total a pagar:</span> <span><%= total_pagar || '---' %></span></div>
+      </div>
+    </section>
+
+    <section style="display:flex; justify-content:space-between; align-items:flex-start; gap:10px;">
+      <div style="flex:1;">
+        <div class="bloque">
+          <div class="fila">
+            <div><span class="lbl">Clave:</span> <span><%= clave || '---' %></span></div>
+            <div><span class="lbl">Asesor:</span> <span><%= asesor || '---' %></span></div>
+          </div>
+          <div class="fila" style="margin-top:6px;">
+            <div><span class="lbl">% Participación:</span> <span><%= participacion || '---' %></span></div>
+            <div><span class="lbl">Centro PDR:</span> <span><%= centro_pdr || '---' %></span></div>
+          </div>
+        </div>
+      </div>
+
+      <div style="width:160px; text-align:center;">
+        <div style="background:#fff; padding:6px; border-radius:4px;">
+          <img src="<%= qrDataUrl %>" alt="QR" style="width:120px; height:120px;">
+          <div style="font-size:10px; margin-top:6px;">Verifique en: afianzadoralaregional.com</div>
+        </div>
+      </div>
+    </section>
+
+    <div class="firmas">
+      <div class="firma">
+        <div class="linea"></div>
+        <div>Firma autorizada</div>
+      </div>
+      <div class="firma">
+        <div class="linea"></div>
+        <div>Sello</div>
+      </div>
+    </div>
+
+    <div class="nota">Emisión: <%= hoy || '' %>. Este certificado es válido para los fines descritos.</div>
+
+    <footer class="pie">Agencia de Afianzamiento LA REGIONAL • Santa Marta, Colombia</footer>
+  </div>
+</body>
+</html>

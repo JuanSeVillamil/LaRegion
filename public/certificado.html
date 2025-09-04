@@ -1,0 +1,219 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Generar Certificado de Fianza</title>
+  <link rel="stylesheet" href="style.css" />
+  <style>
+    body { font-family: Arial, sans-serif; padding: 20px; background: #f5f5f5; }
+    h1, h2 { text-align: center; }
+    form { background: #fff; padding: 20px; border-radius: 8px; max-width: 900px; margin: auto; }
+    .seccion { margin-bottom: 20px; border: 1px solid #ccc; padding: 15px; border-radius: 6px; background: #fafafa; }
+    .seccion h3 { margin-top: 0; font-size: 18px; border-bottom: 1px solid #ddd; padding-bottom: 6px; }
+    .campo { margin-bottom: 10px; display: flex; gap: 10px; }
+    .campo label { flex: 0 0 200px; font-weight: bold; }
+    .campo input, .campo textarea, .campo select { flex: 1; padding: 6px; border: 1px solid #ccc; border-radius: 4px; }
+    table { width: 100%; border-collapse: collapse; margin-top: 10px; }
+    table th, table td { border: 1px solid #ccc; padding: 6px; text-align: center; }
+    table th { background: #eee; }
+    button { padding: 8px 14px; border: none; border-radius: 4px; cursor: pointer; }
+    .btn-agregar { background: #3498db; color: #fff; margin-top: 8px; }
+    .btn-eliminar { background: #e74c3c; color: #fff; }
+    .btn-submit { background: #27ae60; color: #fff; width: 100%; margin-top: 20px; font-size: 16px; }
+  </style>
+</head>
+<body>
+  <h1>Generar Certificado de Fianza</h1>
+  <form id="form-certificado">
+
+    <!-- Datos básicos -->
+    <div class="seccion">
+      <h3>Datos de Expedición</h3>
+      <div class="campo"><label>Ciudad de expedición:</label><input type="text" id="ciudad_expedicion" required /></div>
+      <div class="campo"><label>Fecha de expedición:</label><input type="date" id="fecha_expedicion" required /></div>
+      <div class="campo"><label>Número de fianza:</label><input type="text" id="documento_fianza" required /></div>
+      <div class="campo"><label>Anexo:</label><input type="text" id="anexo" /></div>
+    </div>
+
+    <!-- Contratante -->
+    <div class="seccion">
+      <h3>Contratante</h3>
+      <div class="campo"><label>Nombre:</label><input type="text" id="contratante" /></div>
+      <div class="campo"><label>NIT:</label><input type="text" id="contratante_nit" /></div>
+      <div class="campo"><label>Dirección:</label><input type="text" id="contratante_direccion" /></div>
+      <div class="campo"><label>Teléfono:</label><input type="text" id="contratante_tel" /></div>
+      <div class="campo"><label>Ciudad:</label><input type="text" id="contratante_ciudad" /></div>
+    </div>
+
+    <!-- Afianzado -->
+    <div class="seccion">
+      <h3>Afianzado</h3>
+      <div class="campo"><label>Nombre:</label><input type="text" id="afianzado" /></div>
+      <div class="campo"><label>NIT:</label><input type="text" id="afianzado_nit" /></div>
+      <div class="campo"><label>Dirección:</label><input type="text" id="afianzado_direccion" /></div>
+      <div class="campo"><label>Teléfono:</label><input type="text" id="afianzado_tel" /></div>
+      <div class="campo"><label>Ciudad:</label><input type="text" id="afianzado_ciudad" /></div>
+    </div>
+
+    <!-- Beneficiario -->
+    <div class="seccion">
+      <h3>Beneficiario</h3>
+      <div class="campo"><label>Nombre:</label><input type="text" id="beneficiario" /></div>
+      <div class="campo"><label>NIT:</label><input type="text" id="beneficiario_nit" /></div>
+      <div class="campo"><label>Dirección:</label><input type="text" id="beneficiario_direccion" /></div>
+      <div class="campo"><label>Teléfono:</label><input type="text" id="beneficiario_tel" /></div>
+      <div class="campo"><label>Ciudad:</label><input type="text" id="beneficiario_ciudad" /></div>
+    </div>
+
+    <!-- Objeto -->
+    <div class="seccion">
+      <h3>Objeto y Observaciones</h3>
+      <div class="campo"><label>Objeto:</label><textarea id="objeto" rows="3"></textarea></div>
+      <div class="campo"><label>Observaciones:</label><textarea id="observaciones" rows="2"></textarea></div>
+    </div>
+
+    <!-- Contrato -->
+    <div class="seccion">
+      <h3>Contrato</h3>
+      <div class="campo"><label>Valor contrato:</label><input type="text" id="valor_contrato" /></div>
+      <div class="campo"><label>Clase de contrato:</label><input type="text" id="clase_contrato" /></div>
+      <div class="campo"><label>Pagaré:</label><input type="text" id="pagare" /></div>
+    </div>
+
+    <!-- Fianzas -->
+    <div class="seccion">
+      <h3>Fianzas</h3>
+      <table id="tabla-fianzas">
+        <thead>
+          <tr>
+            <th>Tipo</th>
+            <th>Valor Afianzado</th>
+            <th>Desde</th>
+            <th>Hasta</th>
+            <th>Acción</th>
+          </tr>
+        </thead>
+        <tbody></tbody>
+      </table>
+      <button type="button" class="btn-agregar" onclick="agregarFila()">Agregar Fianza</button>
+    </div>
+
+    <!-- Costos -->
+    <div class="seccion">
+      <h3>Costos</h3>
+      <div class="campo"><label>Total Afianzado:</label><input type="text" id="total_afianzado" /></div>
+      <div class="campo"><label>Costo neto:</label><input type="text" id="costo_neto" /></div>
+      <div class="campo"><label>Costos admin:</label><input type="text" id="costos_admin" /></div>
+      <div class="campo"><label>IVA:</label><input type="text" id="iva" /></div>
+      <div class="campo"><label>Total a pagar:</label><input type="text" id="total_pagar" /></div>
+    </div>
+
+    <!-- Otros -->
+    <div class="seccion">
+      <h3>Otros Datos</h3>
+      <div class="campo"><label>Clave:</label><input type="text" id="clave" /></div>
+      <div class="campo"><label>Asesor:</label><input type="text" id="asesor" /></div>
+      <div class="campo"><label>% Participación:</label><input type="text" id="participacion" /></div>
+      <div class="campo"><label>Centro PDR:</label><input type="text" id="centro_pdr" /></div>
+    </div>
+
+    <button type="submit" class="btn-submit">Generar PDF</button>
+  </form>
+
+  <script>
+    // Agregar fila a la tabla de fianzas
+    function agregarFila() {
+      const tbody = document.querySelector("#tabla-fianzas tbody");
+      const tr = document.createElement("tr");
+      tr.innerHTML = `
+        <td><input type="text" name="tipo_fianza[]" /></td>
+        <td><input type="text" name="valor_afianzado[]" /></td>
+        <td><input type="date" name="desde[]" /></td>
+        <td><input type="date" name="hasta[]" /></td>
+        <td><button type="button" class="btn-eliminar" onclick="this.closest('tr').remove()">Eliminar</button></td>
+      `;
+      tbody.appendChild(tr);
+    }
+
+    // Script de envío
+    document.getElementById('form-certificado').addEventListener('submit', async (e) => {
+      e.preventDefault();
+
+      const toVal = id => document.getElementById(id)?.value ?? '';
+
+      // Recolectar filas de fianzas
+      const filas = [];
+      document.querySelectorAll('#tabla-fianzas tbody tr').forEach(tr => {
+        const tipo = tr.querySelector('input[name="tipo_fianza[]"]')?.value || '';
+        const valor = tr.querySelector('input[name="valor_afianzado[]"]')?.value || '';
+        const desde = tr.querySelector('input[name="desde[]"]')?.value || '';
+        const hasta = tr.querySelector('input[name="hasta[]"]')?.value || '';
+        if (tipo || valor || desde || hasta) filas.push({ tipo, valor, desde, hasta });
+      });
+
+      const payload = {
+        ciudad_expedicion: toVal('ciudad_expedicion'),
+        fecha_expedicion: toVal('fecha_expedicion'),
+        documento_fianza: toVal('documento_fianza'),
+        anexo: toVal('anexo'),
+        contratante: toVal('contratante'),
+        contratante_nit: toVal('contratante_nit'),
+        contratante_direccion: toVal('contratante_direccion'),
+        contratante_tel: toVal('contratante_tel'),
+        contratante_ciudad: toVal('contratante_ciudad'),
+        afianzado: toVal('afianzado'),
+        afianzado_nit: toVal('afianzado_nit'),
+        afianzado_direccion: toVal('afianzado_direccion'),
+        afianzado_tel: toVal('afianzado_tel'),
+        afianzado_ciudad: toVal('afianzado_ciudad'),
+        beneficiario: toVal('beneficiario'),
+        beneficiario_nit: toVal('beneficiario_nit'),
+        beneficiario_direccion: toVal('beneficiario_direccion'),
+        beneficiario_tel: toVal('beneficiario_tel'),
+        beneficiario_ciudad: toVal('beneficiario_ciudad'),
+        objeto: toVal('objeto'),
+        observaciones: toVal('observaciones'),
+        valor_contrato: toVal('valor_contrato'),
+        clase_contrato: toVal('clase_contrato'),
+        pagare: toVal('pagare'),
+        fianzas: filas,
+        total_afianzado: toVal('total_afianzado'),
+        costo_neto: toVal('costo_neto'),
+        costos_admin: toVal('costos_admin'),
+        iva: toVal('iva'),
+        total_pagar: toVal('total_pagar'),
+        clave: toVal('clave'),
+        asesor: toVal('asesor'),
+        participacion: toVal('participacion'),
+        centro_pdr: toVal('centro_pdr')
+      };
+
+      try {
+        const res = await fetch('/generar-certificado', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(payload)
+        });
+
+        if (!res.ok) {
+          const err = await res.json().catch(()=>null);
+          alert('Error generando PDF: ' + (err?.mensaje || res.statusText));
+          return;
+        }
+
+        const blob = await res.blob();
+        const url = window.URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `certificado_${payload.documento_fianza || 'certificado'}.pdf`;
+        a.click();
+        window.URL.revokeObjectURL(url);
+      } catch (error) {
+        console.error(error);
+        alert('Error al conectar con el servidor');
+      }
+    });
+  </script>
+</body>
+</html>
