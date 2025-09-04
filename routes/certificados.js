@@ -19,15 +19,12 @@ const router = express.Router();
  * Si tu app usa otra forma (tokens, cookies), sustituye la validación.
  */
 function requireAdmin(req, res, next) {
-  try {
-    if (req.session && (req.session.activa || req.session.autenticado)) return next();
-    // En desarrollo local podrías permitirlo con una cabecera (opcional).
-    // if (process.env.NODE_ENV !== 'production' && req.headers['x-dev-allow'] === '1') return next();
-    return res.status(401).json({ mensaje: 'No autorizado' });
-  } catch (err) {
-    return res.status(401).json({ mensaje: 'No autorizado' });
+  if (req.session && req.session.usuario === 'admin') {
+    return next();
   }
+  return res.status(401).json({ mensaje: 'No autorizado' });
 }
+
 
 // Ruta para generar certificado (POST JSON)
 router.post('/generar-certificado', requireAdmin, async (req, res) => {
