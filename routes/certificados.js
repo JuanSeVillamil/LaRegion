@@ -6,12 +6,14 @@ const ejs = require('ejs');
 const dayjs = require('dayjs');
 require('dayjs/locale/es');
 const QRCode = require('qrcode');
-const puppeteer = require('puppeteer');
+const puppeteer = require('puppeteer-core');
+const chromium = require('chrome-aws-lambda');
 
 dayjs.locale('es');
 
 const router = express.Router();
 
+// Middleware para proteger rutas (solo admin)
 function requireAdmin(req, res, next) {
   if (req.session && req.session.usuario === 'admin') {
     return next();
@@ -19,9 +21,12 @@ function requireAdmin(req, res, next) {
   return res.status(401).json({ mensaje: 'No autorizado' });
 }
 
+// Ruta para generar certificado (POST JSON)
 router.post('/generar-certificado', requireAdmin, async (req, res) => {
   try {
     const body = req.body || {};
+
+    // --- Campos simples ---
     const {
       ciudad_expedicion,
       fecha_expedicion,
@@ -36,6 +41,7 @@ router.post('/generar-certificado', requireAdmin, async (req, res) => {
       clave, asesor, participacion, centro_pdr
     } = body;
 
+    // --- Fianzas ---
     let fianzas = [];
     if (Array.isArray(body.fianzas)) {
       fianzas = body.fianzas;
@@ -69,6 +75,7 @@ router.post('/generar-certificado', requireAdmin, async (req, res) => {
       fs.readFile(watermarkPath).then(b => `data:image/png;base64,${b.toString('base64')}`).catch(() => null)
     ]);
 
+    // Render EJS -> HTML
     const html = await ejs.renderFile(
       path.join(__dirname, '../templates/certificado.ejs'),
       {
@@ -93,10 +100,14 @@ router.post('/generar-certificado', requireAdmin, async (req, res) => {
       { async: true }
     );
 
+    // Lanzar Puppeteer con Chrome AWS Lambda
     const browser = await puppeteer.launch({
-      args: ['--no-sandbox', '--disable-setuid-sandbox']
+      args: chromium.args,
+      executablePath: await chromium.executablePath,
+      headless: chromium.headless
     });
     const page = await browser.newPage();
+
     await page.setContent(html, { waitUntil: 'networkidle0' });
 
     const cssPath = path.join(__dirname, '../templates/certificado.css');
@@ -119,12 +130,7 @@ router.post('/generar-certificado', requireAdmin, async (req, res) => {
 
   } catch (err) {
     console.error('Error en /generar-certificado:', err);
-    // 🔥 Devolver error detallado al navegador
-    return res.status(500).send(`
-      <h2>Error generando certificado</h2>
-      <pre>${err.message}</pre>
-      <pre>${err.stack}</pre>
-    `);
+    return res.status(500).json({ mensaje: 'Error generando certificado', detalle: err.message });
   }
 });
 
