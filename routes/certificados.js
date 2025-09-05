@@ -79,7 +79,7 @@ router.post('/generar-certificado', async (req, res) => {
               <tr><th>Tipo</th><th>Valor</th><th>Desde</th><th>Hasta</th></tr>
             </thead>
             <tbody>
-              ${data.fianzas.map(f =>
+              ${(data.fianzas || []).map(f =>
                 `<tr>
                   <td>${f.tipo}</td>
                   <td>${f.valor}</td>
@@ -105,11 +105,18 @@ router.post('/generar-certificado', async (req, res) => {
       </html>
     `;
 
-    // 🚀 Lanzar Puppeteer
+    // 🚀 Lanzar Puppeteer con Chrome del sistema
     const browser = await puppeteer.launch({
+      executablePath: process.env.CHROME_PATH || '/usr/bin/google-chrome',
       headless: true,
-      args: ['--no-sandbox', '--disable-setuid-sandbox'] // necesario en Render
+      args: [
+        '--no-sandbox',
+        '--disable-setuid-sandbox',
+        '--disable-gpu',
+        '--disable-dev-shm-usage'
+      ]
     });
+
     const page = await browser.newPage();
     await page.setContent(htmlContent, { waitUntil: 'networkidle0' });
 
@@ -124,7 +131,7 @@ router.post('/generar-certificado', async (req, res) => {
 
   } catch (err) {
     console.error('Error en /generar-certificado:', err);
-    res.status(500).json({ mensaje: 'Error generando certificado' });
+    res.status(500).json({ mensaje: 'Error generando certificado', detalle: err.message });
   }
 });
 
