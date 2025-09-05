@@ -6,31 +6,19 @@ const ejs = require('ejs');
 const dayjs = require('dayjs');
 require('dayjs/locale/es');
 const QRCode = require('qrcode');
-
-// 👇 importante: usar puppeteer-core + chrome-aws-lambda
-const chromium = require('chrome-aws-lambda');
 const puppeteer = require('puppeteer-core');
+const chromium = require('chrome-aws-lambda');
 
 dayjs.locale('es');
 
 const router = express.Router();
 
-/**
- * Middleware de autenticación admin
- */
-function requireAdmin(req, res, next) {
-  if (req.session && req.session.usuario === 'admin') {
-    return next();
-  }
-  return res.status(401).json({ mensaje: 'No autorizado' });
-}
-
-// Ruta para generar certificado
-router.post('/generar-certificado', requireAdmin, async (req, res) => {
+// 🔹 Ruta pública para generar certificado
+router.post('/generar-certificado', async (req, res) => {
   try {
     const body = req.body || {};
 
-    // Extraer datos del body
+    // --- Extraer datos ---
     const {
       ciudad_expedicion,
       fecha_expedicion,
@@ -45,7 +33,7 @@ router.post('/generar-certificado', requireAdmin, async (req, res) => {
       clave, asesor, participacion, centro_pdr
     } = body;
 
-    // Procesar fianzas
+    // --- Fianzas ---
     let fianzas = [];
     if (Array.isArray(body.fianzas)) {
       fianzas = body.fianzas;
@@ -65,16 +53,14 @@ router.post('/generar-certificado', requireAdmin, async (req, res) => {
       totalAfianzadoCalc = fianzas.reduce((s, f) => s + (Number(f.valor) || 0), 0);
     }
 
-    // Fechas
     const fmt = d => (d ? dayjs(d).format('D [de] MMMM [de] YYYY') : '');
     const fechaExpFmt = fmt(fecha_expedicion);
     const hoy = fmt(new Date());
 
-    // QR de verificación
     const verificarUrl = `https://afianzadoralaregional.com/?n=${encodeURIComponent(documento_fianza || '')}`;
     const qrDataUrl = await QRCode.toDataURL(verificarUrl, { margin: 0 });
 
-    // Logo y marca de agua
+    // Leer imágenes (si existen)
     const logoPath = path.join(__dirname, '../assets/img/logo.png');
     const watermarkPath = path.join(__dirname, '../assets/img/watermark.png');
     const [logoB64, watermarkB64] = await Promise.all([
@@ -82,7 +68,7 @@ router.post('/generar-certificado', requireAdmin, async (req, res) => {
       fs.readFile(watermarkPath).then(b => `data:image/png;base64,${b.toString('base64')}`).catch(() => null)
     ]);
 
-    // Render plantilla EJS
+    // Render EJS -> HTML
     const html = await ejs.renderFile(
       path.join(__dirname, '../templates/certificado.ejs'),
       {
@@ -107,18 +93,17 @@ router.post('/generar-certificado', requireAdmin, async (req, res) => {
       { async: true }
     );
 
-    // Lanzar puppeteer-core con chrome-aws-lambda
+    // 🔹 Lanzar Puppeteer con chrome-aws-lambda
     const browser = await puppeteer.launch({
       args: chromium.args,
       executablePath: await chromium.executablePath,
       headless: chromium.headless,
-      defaultViewport: chromium.defaultViewport,
     });
 
     const page = await browser.newPage();
     await page.setContent(html, { waitUntil: 'networkidle0' });
 
-    // CSS opcional
+    // CSS adicional
     const cssPath = path.join(__dirname, '../templates/certificado.css');
     await page.addStyleTag({ path: cssPath }).catch(() => {});
 
@@ -131,7 +116,6 @@ router.post('/generar-certificado', requireAdmin, async (req, res) => {
 
     await browser.close();
 
-    // Respuesta con el PDF
     res.setHeader('Content-Type', 'application/pdf');
     res.setHeader('Content-Disposition', `attachment; filename=certificado_${documento_fianza || 'sin_numero'}.pdf`);
     return res.send(pdfBuffer);

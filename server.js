@@ -237,9 +237,9 @@ app.post('/logout', (req, res) => {
   });
 });
 
-// 🔹 Rutas de certificados (protegidas)
+// 🔹 Rutas de certificados (⚠️ ahora sin login requerido)
 const certificadosRouter = require('./routes/certificados');
-app.use('/certificados', protegerRuta, certificadosRouter);
+app.use('/certificados', certificadosRouter);
 
 // 🔹 Start server
 app.listen(PORT, () => {
