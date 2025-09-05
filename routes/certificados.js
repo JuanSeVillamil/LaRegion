@@ -6,18 +6,15 @@ const ejs = require('ejs');
 const dayjs = require('dayjs');
 require('dayjs/locale/es');
 const QRCode = require('qrcode');
-const puppeteer = require('puppeteer');
+
+// Puppeteer adaptado a Render
+const chromium = require('@sparticuz/chromium');
+const puppeteer = require('puppeteer-core');
 
 dayjs.locale('es');
 
 const router = express.Router();
 
-/**
- * requireAdmin:
- * Ajusta este middleware según tu lógica de sesión.
- * Aquí se asume req.session && req.session.activa || req.session.autenticado.
- * Si tu app usa otra forma (tokens, cookies), sustituye la validación.
- */
 function requireAdmin(req, res, next) {
   if (req.session && req.session.usuario === 'admin') {
     return next();
@@ -25,14 +22,9 @@ function requireAdmin(req, res, next) {
   return res.status(401).json({ mensaje: 'No autorizado' });
 }
 
-
-// Ruta para generar certificado (POST JSON)
 router.post('/generar-certificado', requireAdmin, async (req, res) => {
   try {
-    // --- Extraer datos del body ---
     const body = req.body || {};
-
-    // Campos simples
     const {
       ciudad_expedicion,
       fecha_expedicion,
@@ -47,9 +39,7 @@ router.post('/generar-certificado', requireAdmin, async (req, res) => {
       clave, asesor, participacion, centro_pdr
     } = body;
 
-    // --- Fianzas: soporta dos formatos:
-    // 1) body.fianzas = [{ tipo, valor, desde, hasta }, ...]
-    // 2) arrays separadas: tipo_fianza[], valor_afianzado[], desde[], hasta[]
+    // Fianzas
     let fianzas = [];
     if (Array.isArray(body.fianzas)) {
       fianzas = body.fianzas;
@@ -64,22 +54,18 @@ router.post('/generar-certificado', requireAdmin, async (req, res) => {
       }
     }
 
-    // Si no mandaron total_afianzado, lo calculamos (si hay valores)
     let totalAfianzadoCalc = 0;
     if ((!total_afianzado || total_afianzado === '') && fianzas.length) {
       totalAfianzadoCalc = fianzas.reduce((s, f) => s + (Number(f.valor) || 0), 0);
     }
 
-    // Formatea fechas (ej: 30 de mayo de 2025)
     const fmt = d => (d ? dayjs(d).format('D [de] MMMM [de] YYYY') : '');
     const fechaExpFmt = fmt(fecha_expedicion);
     const hoy = fmt(new Date());
 
-    // Generar QR (apunta a una URL de verificación pública; ajústala)
     const verificarUrl = `https://afianzadoralaregional.com/?n=${encodeURIComponent(documento_fianza || '')}`;
     const qrDataUrl = await QRCode.toDataURL(verificarUrl, { margin: 0 });
 
-    // Leer imágenes (logo y watermark) y convertir a dataURL
     const logoPath = path.join(__dirname, '../assets/img/logo.png');
     const watermarkPath = path.join(__dirname, '../assets/img/watermark.png');
     const [logoB64, watermarkB64] = await Promise.all([
@@ -87,7 +73,6 @@ router.post('/generar-certificado', requireAdmin, async (req, res) => {
       fs.readFile(watermarkPath).then(b => `data:image/png;base64,${b.toString('base64')}`).catch(() => null)
     ]);
 
-    // Render EJS -> HTML
     const html = await ejs.renderFile(
       path.join(__dirname, '../templates/certificado.ejs'),
       {
@@ -112,21 +97,20 @@ router.post('/generar-certificado', requireAdmin, async (req, res) => {
       { async: true }
     );
 
-    // Lanzar Puppeteer
+    // 🚀 Puppeteer para Render
     const browser = await puppeteer.launch({
-      args: ['--no-sandbox', '--disable-setuid-sandbox']
-      // si estás en local y tienes problemas, prueba sin args
+      args: chromium.args,
+      defaultViewport: chromium.defaultViewport,
+      executablePath: await chromium.executablePath(),
+      headless: chromium.headless,
     });
-    const page = await browser.newPage();
 
-    // Setear contenido y agregar css externo
+    const page = await browser.newPage();
     await page.setContent(html, { waitUntil: 'networkidle0' });
 
-    // Agregar CSS from templates/certificado.css (si existe)
     const cssPath = path.join(__dirname, '../templates/certificado.css');
-    await page.addStyleTag({ path: cssPath }).catch(() => { /* ignore */ });
+    await page.addStyleTag({ path: cssPath }).catch(() => {});
 
-    // Generar PDF
     const pdfBuffer = await page.pdf({
       format: 'A4',
       printBackground: true,
@@ -135,7 +119,6 @@ router.post('/generar-certificado', requireAdmin, async (req, res) => {
 
     await browser.close();
 
-    // Enviar PDF
     res.setHeader('Content-Type', 'application/pdf');
     res.setHeader('Content-Disposition', `attachment; filename=certificado_${documento_fianza || 'sin_numero'}.pdf`);
     return res.send(pdfBuffer);
