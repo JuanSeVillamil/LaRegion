@@ -1,12 +1,12 @@
 const express = require('express');
 const router = express.Router();
-const puppeteer = require('puppeteer'); // ✅ usamos puppeteer normal
+const puppeteer = require('puppeteer'); // ✅ puppeteer normal (no core)
 
+// 🚀 Generar certificado PDF
 router.post('/generar-certificado', async (req, res) => {
   try {
     const data = req.body;
 
-    // Construir el HTML del certificado
     const htmlContent = `
       <html>
         <head>
@@ -105,9 +105,8 @@ router.post('/generar-certificado', async (req, res) => {
       </html>
     `;
 
-    // 🚀 Lanzar Puppeteer con Chrome del sistema
+    // 🚀 Puppeteer con Chromium incluido en node_modules
     const browser = await puppeteer.launch({
-      executablePath: process.env.CHROME_PATH || '/usr/bin/google-chrome',
       headless: true,
       args: [
         '--no-sandbox',
