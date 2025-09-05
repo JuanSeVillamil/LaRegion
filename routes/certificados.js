@@ -6,10 +6,7 @@ const ejs = require('ejs');
 const dayjs = require('dayjs');
 require('dayjs/locale/es');
 const QRCode = require('qrcode');
-
-// Puppeteer adaptado a Render
-const chromium = require('@sparticuz/chromium');
-const puppeteer = require('puppeteer-core');
+const puppeteer = require('puppeteer');
 
 dayjs.locale('es');
 
@@ -39,7 +36,6 @@ router.post('/generar-certificado', requireAdmin, async (req, res) => {
       clave, asesor, participacion, centro_pdr
     } = body;
 
-    // Fianzas
     let fianzas = [];
     if (Array.isArray(body.fianzas)) {
       fianzas = body.fianzas;
@@ -97,14 +93,9 @@ router.post('/generar-certificado', requireAdmin, async (req, res) => {
       { async: true }
     );
 
-    // 🚀 Puppeteer para Render
     const browser = await puppeteer.launch({
-      args: chromium.args,
-      defaultViewport: chromium.defaultViewport,
-      executablePath: await chromium.executablePath(),
-      headless: chromium.headless,
+      args: ['--no-sandbox', '--disable-setuid-sandbox']
     });
-
     const page = await browser.newPage();
     await page.setContent(html, { waitUntil: 'networkidle0' });
 
@@ -120,16 +111,20 @@ router.post('/generar-certificado', requireAdmin, async (req, res) => {
     await browser.close();
 
     res.setHeader('Content-Type', 'application/pdf');
-    res.setHeader('Content-Disposition', `attachment; filename=certificado_${documento_fianza || 'sin_numero'}.pdf`);
+    res.setHeader(
+      'Content-Disposition',
+      `attachment; filename=certificado_${documento_fianza || 'sin_numero'}.pdf`
+    );
     return res.send(pdfBuffer);
 
   } catch (err) {
     console.error('Error en /generar-certificado:', err);
+    // 🔥 Devolver error detallado al navegador
     return res.status(500).send(`
-      <pre>Error generando certificado:
-  ${err.message}
-  ${err.stack}</pre>
-  `);
+      <h2>Error generando certificado</h2>
+      <pre>${err.message}</pre>
+      <pre>${err.stack}</pre>
+    `);
   }
 });
 
