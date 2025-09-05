@@ -1,128 +1,130 @@
-// routes/certificados.js
 const express = require('express');
-const path = require('path');
-const fs = require('fs').promises;
-const ejs = require('ejs');
-const dayjs = require('dayjs');
-require('dayjs/locale/es');
-const QRCode = require('qrcode');
-const puppeteer = require('puppeteer-core');
-const chromium = require('chrome-aws-lambda');
-
-dayjs.locale('es');
-
 const router = express.Router();
+const puppeteer = require('puppeteer'); // ✅ usamos puppeteer normal
 
-// 🔹 Ruta pública para generar certificado
 router.post('/generar-certificado', async (req, res) => {
   try {
-    const body = req.body || {};
+    const data = req.body;
 
-    // --- Extraer datos ---
-    const {
-      ciudad_expedicion,
-      fecha_expedicion,
-      documento_fianza,
-      anexo,
-      contratante, contratante_nit, contratante_direccion, contratante_tel, contratante_ciudad,
-      afianzado, afianzado_nit, afianzado_direccion, afianzado_tel, afianzado_ciudad,
-      beneficiario, beneficiario_nit, beneficiario_direccion, beneficiario_tel, beneficiario_ciudad,
-      objeto, observaciones,
-      valor_contrato, clase_contrato, pagare,
-      total_afianzado, costo_neto, costos_admin, iva, total_pagar,
-      clave, asesor, participacion, centro_pdr
-    } = body;
+    // Construir el HTML del certificado
+    const htmlContent = `
+      <html>
+        <head>
+          <style>
+            body { font-family: Arial, sans-serif; font-size: 12px; margin: 40px; }
+            h1 { text-align: center; font-size: 20px; }
+            h2 { margin-top: 30px; font-size: 16px; }
+            table { width: 100%; border-collapse: collapse; margin-top: 10px; }
+            table, th, td { border: 1px solid #444; }
+            th, td { padding: 6px; text-align: center; }
+            .logo { text-align: center; margin-bottom: 20px; }
+            .watermark {
+              position: fixed;
+              top: 35%;
+              left: 15%;
+              opacity: 0.1;
+              font-size: 100px;
+              color: #000;
+              transform: rotate(-30deg);
+              z-index: -1;
+            }
+          </style>
+        </head>
+        <body>
+          <div class="logo">
+            <img src="https://www.afianzadoralaregional.com/logo.png" width="120"/>
+          </div>
+          <div class="watermark">FIANZA</div>
+          <h1>Certificado de Fianza de Cumplimiento</h1>
 
-    // --- Fianzas ---
-    let fianzas = [];
-    if (Array.isArray(body.fianzas)) {
-      fianzas = body.fianzas;
-    } else if (Array.isArray(body.tipo_fianza)) {
-      for (let i = 0; i < body.tipo_fianza.length; i++) {
-        fianzas.push({
-          tipo: body.tipo_fianza[i],
-          valor: body.valor_afianzado?.[i] ?? '',
-          desde: body.desde?.[i] ?? '',
-          hasta: body.hasta?.[i] ?? ''
-        });
-      }
-    }
+          <h2>Datos de Expedición</h2>
+          <p><b>Ciudad:</b> ${data.ciudad_expedicion}</p>
+          <p><b>Fecha:</b> ${data.fecha_expedicion}</p>
+          <p><b>Número de Fianza:</b> ${data.documento_fianza}</p>
+          <p><b>Anexo:</b> ${data.anexo}</p>
 
-    let totalAfianzadoCalc = 0;
-    if ((!total_afianzado || total_afianzado === '') && fianzas.length) {
-      totalAfianzadoCalc = fianzas.reduce((s, f) => s + (Number(f.valor) || 0), 0);
-    }
+          <h2>Contratante</h2>
+          <p><b>Nombre:</b> ${data.contratante}</p>
+          <p><b>NIT:</b> ${data.contratante_nit}</p>
+          <p><b>Dirección:</b> ${data.contratante_direccion}</p>
+          <p><b>Teléfono:</b> ${data.contratante_tel}</p>
+          <p><b>Ciudad:</b> ${data.contratante_ciudad}</p>
 
-    const fmt = d => (d ? dayjs(d).format('D [de] MMMM [de] YYYY') : '');
-    const fechaExpFmt = fmt(fecha_expedicion);
-    const hoy = fmt(new Date());
+          <h2>Afianzado</h2>
+          <p><b>Nombre:</b> ${data.afianzado}</p>
+          <p><b>NIT:</b> ${data.afianzado_nit}</p>
+          <p><b>Dirección:</b> ${data.afianzado_direccion}</p>
+          <p><b>Teléfono:</b> ${data.afianzado_tel}</p>
+          <p><b>Ciudad:</b> ${data.afianzado_ciudad}</p>
 
-    const verificarUrl = `https://afianzadoralaregional.com/?n=${encodeURIComponent(documento_fianza || '')}`;
-    const qrDataUrl = await QRCode.toDataURL(verificarUrl, { margin: 0 });
+          <h2>Beneficiario</h2>
+          <p><b>Nombre:</b> ${data.beneficiario}</p>
+          <p><b>NIT:</b> ${data.beneficiario_nit}</p>
+          <p><b>Dirección:</b> ${data.beneficiario_direccion}</p>
+          <p><b>Teléfono:</b> ${data.beneficiario_tel}</p>
+          <p><b>Ciudad:</b> ${data.beneficiario_ciudad}</p>
 
-    // Leer imágenes (si existen)
-    const logoPath = path.join(__dirname, '../assets/img/logo.png');
-    const watermarkPath = path.join(__dirname, '../assets/img/watermark.png');
-    const [logoB64, watermarkB64] = await Promise.all([
-      fs.readFile(logoPath).then(b => `data:image/png;base64,${b.toString('base64')}`).catch(() => null),
-      fs.readFile(watermarkPath).then(b => `data:image/png;base64,${b.toString('base64')}`).catch(() => null)
-    ]);
+          <h2>Objeto y Observaciones</h2>
+          <p><b>Objeto:</b> ${data.objeto}</p>
+          <p><b>Observaciones:</b> ${data.observaciones}</p>
 
-    // Render EJS -> HTML
-    const html = await ejs.renderFile(
-      path.join(__dirname, '../templates/certificado.ejs'),
-      {
-        ciudad_expedicion,
-        fecha_expedicion: fechaExpFmt,
-        documento_fianza,
-        anexo,
-        contratante, contratante_nit, contratante_direccion, contratante_tel, contratante_ciudad,
-        afianzado, afianzado_nit, afianzado_direccion, afianzado_tel, afianzado_ciudad,
-        beneficiario, beneficiario_nit, beneficiario_direccion, beneficiario_tel, beneficiario_ciudad,
-        objeto, observaciones,
-        valor_contrato, clase_contrato, pagare,
-        total_afianzado: total_afianzado || totalAfianzadoCalc,
-        costo_neto, costos_admin, iva, total_pagar,
-        clave, asesor, participacion, centro_pdr,
-        fianzas,
-        hoy,
-        qrDataUrl,
-        logoDataUrl: logoB64,
-        watermarkDataUrl: watermarkB64
-      },
-      { async: true }
-    );
+          <h2>Contrato</h2>
+          <p><b>Valor:</b> ${data.valor_contrato}</p>
+          <p><b>Clase:</b> ${data.clase_contrato}</p>
+          <p><b>Pagaré:</b> ${data.pagare}</p>
 
-    // 🔹 Lanzar Puppeteer con chrome-aws-lambda
+          <h2>Fianzas</h2>
+          <table>
+            <thead>
+              <tr><th>Tipo</th><th>Valor</th><th>Desde</th><th>Hasta</th></tr>
+            </thead>
+            <tbody>
+              ${data.fianzas.map(f =>
+                `<tr>
+                  <td>${f.tipo}</td>
+                  <td>${f.valor}</td>
+                  <td>${f.desde}</td>
+                  <td>${f.hasta}</td>
+                </tr>`).join('')}
+            </tbody>
+          </table>
+
+          <h2>Costos</h2>
+          <p><b>Total Afianzado:</b> ${data.total_afianzado}</p>
+          <p><b>Costo Neto:</b> ${data.costo_neto}</p>
+          <p><b>Costos Admin:</b> ${data.costos_admin}</p>
+          <p><b>IVA:</b> ${data.iva}</p>
+          <p><b>Total a Pagar:</b> ${data.total_pagar}</p>
+
+          <h2>Otros</h2>
+          <p><b>Clave:</b> ${data.clave}</p>
+          <p><b>Asesor:</b> ${data.asesor}</p>
+          <p><b>% Participación:</b> ${data.participacion}</p>
+          <p><b>Centro PDR:</b> ${data.centro_pdr}</p>
+        </body>
+      </html>
+    `;
+
+    // 🚀 Lanzar Puppeteer
     const browser = await puppeteer.launch({
-      args: chromium.args,
-      executablePath: await chromium.executablePath,
-      headless: chromium.headless,
+      headless: true,
+      args: ['--no-sandbox', '--disable-setuid-sandbox'] // necesario en Render
     });
-
     const page = await browser.newPage();
-    await page.setContent(html, { waitUntil: 'networkidle0' });
+    await page.setContent(htmlContent, { waitUntil: 'networkidle0' });
 
-    // CSS adicional
-    const cssPath = path.join(__dirname, '../templates/certificado.css');
-    await page.addStyleTag({ path: cssPath }).catch(() => {});
-
-    // Generar PDF
-    const pdfBuffer = await page.pdf({
-      format: 'A4',
-      printBackground: true,
-      margin: { top: '18mm', right: '12mm', bottom: '18mm', left: '12mm' }
-    });
-
+    const pdfBuffer = await page.pdf({ format: 'A4' });
     await browser.close();
 
-    res.setHeader('Content-Type', 'application/pdf');
-    res.setHeader('Content-Disposition', `attachment; filename=certificado_${documento_fianza || 'sin_numero'}.pdf`);
-    return res.send(pdfBuffer);
+    res.set({
+      'Content-Type': 'application/pdf',
+      'Content-Disposition': `attachment; filename="certificado_${data.documento_fianza || 'certificado'}.pdf"`,
+    });
+    res.send(pdfBuffer);
 
   } catch (err) {
     console.error('Error en /generar-certificado:', err);
-    return res.status(500).json({ mensaje: 'Error generando certificado', detalle: err.message });
+    res.status(500).json({ mensaje: 'Error generando certificado' });
   }
 });
 
