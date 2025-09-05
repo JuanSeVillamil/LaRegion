@@ -122,7 +122,6 @@
   </form>
 
   <script>
-    // Agregar fila a la tabla de fianzas
     function agregarFila() {
       const tbody = document.querySelector("#tabla-fianzas tbody");
       const tr = document.createElement("tr");
@@ -136,13 +135,11 @@
       tbody.appendChild(tr);
     }
 
-    // Script de envío
     document.getElementById('form-certificado').addEventListener('submit', async (e) => {
       e.preventDefault();
 
       const toVal = id => document.getElementById(id)?.value ?? '';
 
-      // Recolectar filas de fianzas
       const filas = [];
       document.querySelectorAll('#tabla-fianzas tbody tr').forEach(tr => {
         const tipo = tr.querySelector('input[name="tipo_fianza[]"]')?.value || '';
@@ -190,7 +187,7 @@
       };
 
       try {
-        const res = await fetch('/generar-certificado', {
+        const res = await fetch('/certificados/generar-certificado', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify(payload)
