@@ -125,7 +125,11 @@ router.post('/generar-certificado', requireAdmin, async (req, res) => {
 
   } catch (err) {
     console.error('Error en /generar-certificado:', err);
-    return res.status(500).json({ mensaje: 'Error generando certificado', detalle: err.message });
+    return res.status(500).send(`
+      <pre>Error generando certificado:
+  ${err.message}
+  ${err.stack}</pre>
+  `);
   }
 });
 
