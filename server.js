@@ -70,7 +70,7 @@ app.use(express.static(path.join(__dirname, 'public')));
   }
 })();
 
-// 🔹 Middleware de protección
+// 🔹 Middleware de protección (para panel y admin)
 function protegerRuta(req, res, next) {
   if (req.session && req.session.usuario === 'admin') {
     next();
@@ -239,7 +239,7 @@ app.post('/logout', (req, res) => {
 
 // 🔹 Rutas de certificados (⚡️ públicas, sin login)
 const certificadosRouter = require('./routes/certificados');
-app.use('/certificados', certificadosRouter);
+app.use('/', certificadosRouter); // 👈 ahora cualquier POST a /generar-certificado funciona sin login
 
 // 🔹 Start server
 app.listen(PORT, () => {

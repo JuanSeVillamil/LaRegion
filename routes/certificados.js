@@ -1,137 +1,100 @@
 const express = require('express');
 const router = express.Router();
-const puppeteer = require('puppeteer'); // ✅ puppeteer normal (no core)
+const PDFDocument = require('pdfkit');
+const path = require('path');
 
-// 🚀 Generar certificado PDF
 router.post('/generar-certificado', async (req, res) => {
   try {
     const data = req.body;
 
-    const htmlContent = `
-      <html>
-        <head>
-          <style>
-            body { font-family: Arial, sans-serif; font-size: 12px; margin: 40px; }
-            h1 { text-align: center; font-size: 20px; }
-            h2 { margin-top: 30px; font-size: 16px; }
-            table { width: 100%; border-collapse: collapse; margin-top: 10px; }
-            table, th, td { border: 1px solid #444; }
-            th, td { padding: 6px; text-align: center; }
-            .logo { text-align: center; margin-bottom: 20px; }
-            .watermark {
-              position: fixed;
-              top: 35%;
-              left: 15%;
-              opacity: 0.1;
-              font-size: 100px;
-              color: #000;
-              transform: rotate(-30deg);
-              z-index: -1;
-            }
-          </style>
-        </head>
-        <body>
-          <div class="logo">
-            <img src="https://www.afianzadoralaregional.com/logo.png" width="120"/>
-          </div>
-          <div class="watermark">FIANZA</div>
-          <h1>Certificado de Fianza de Cumplimiento</h1>
-
-          <h2>Datos de Expedición</h2>
-          <p><b>Ciudad:</b> ${data.ciudad_expedicion}</p>
-          <p><b>Fecha:</b> ${data.fecha_expedicion}</p>
-          <p><b>Número de Fianza:</b> ${data.documento_fianza}</p>
-          <p><b>Anexo:</b> ${data.anexo}</p>
-
-          <h2>Contratante</h2>
-          <p><b>Nombre:</b> ${data.contratante}</p>
-          <p><b>NIT:</b> ${data.contratante_nit}</p>
-          <p><b>Dirección:</b> ${data.contratante_direccion}</p>
-          <p><b>Teléfono:</b> ${data.contratante_tel}</p>
-          <p><b>Ciudad:</b> ${data.contratante_ciudad}</p>
-
-          <h2>Afianzado</h2>
-          <p><b>Nombre:</b> ${data.afianzado}</p>
-          <p><b>NIT:</b> ${data.afianzado_nit}</p>
-          <p><b>Dirección:</b> ${data.afianzado_direccion}</p>
-          <p><b>Teléfono:</b> ${data.afianzado_tel}</p>
-          <p><b>Ciudad:</b> ${data.afianzado_ciudad}</p>
-
-          <h2>Beneficiario</h2>
-          <p><b>Nombre:</b> ${data.beneficiario}</p>
-          <p><b>NIT:</b> ${data.beneficiario_nit}</p>
-          <p><b>Dirección:</b> ${data.beneficiario_direccion}</p>
-          <p><b>Teléfono:</b> ${data.beneficiario_tel}</p>
-          <p><b>Ciudad:</b> ${data.beneficiario_ciudad}</p>
-
-          <h2>Objeto y Observaciones</h2>
-          <p><b>Objeto:</b> ${data.objeto}</p>
-          <p><b>Observaciones:</b> ${data.observaciones}</p>
-
-          <h2>Contrato</h2>
-          <p><b>Valor:</b> ${data.valor_contrato}</p>
-          <p><b>Clase:</b> ${data.clase_contrato}</p>
-          <p><b>Pagaré:</b> ${data.pagare}</p>
-
-          <h2>Fianzas</h2>
-          <table>
-            <thead>
-              <tr><th>Tipo</th><th>Valor</th><th>Desde</th><th>Hasta</th></tr>
-            </thead>
-            <tbody>
-              ${(data.fianzas || []).map(f =>
-                `<tr>
-                  <td>${f.tipo}</td>
-                  <td>${f.valor}</td>
-                  <td>${f.desde}</td>
-                  <td>${f.hasta}</td>
-                </tr>`).join('')}
-            </tbody>
-          </table>
-
-          <h2>Costos</h2>
-          <p><b>Total Afianzado:</b> ${data.total_afianzado}</p>
-          <p><b>Costo Neto:</b> ${data.costo_neto}</p>
-          <p><b>Costos Admin:</b> ${data.costos_admin}</p>
-          <p><b>IVA:</b> ${data.iva}</p>
-          <p><b>Total a Pagar:</b> ${data.total_pagar}</p>
-
-          <h2>Otros</h2>
-          <p><b>Clave:</b> ${data.clave}</p>
-          <p><b>Asesor:</b> ${data.asesor}</p>
-          <p><b>% Participación:</b> ${data.participacion}</p>
-          <p><b>Centro PDR:</b> ${data.centro_pdr}</p>
-        </body>
-      </html>
-    `;
-
-    // 🚀 Puppeteer con Chromium incluido en node_modules
-    const browser = await puppeteer.launch({
-      headless: true,
-      args: [
-        '--no-sandbox',
-        '--disable-setuid-sandbox',
-        '--disable-gpu',
-        '--disable-dev-shm-usage'
-      ]
+    // Crear PDF
+    const doc = new PDFDocument({ margin: 50 });
+    let buffers = [];
+    doc.on('data', buffers.push.bind(buffers));
+    doc.on('end', () => {
+      const pdfBuffer = Buffer.concat(buffers);
+      res.set({
+        'Content-Type': 'application/pdf',
+        'Content-Disposition': `attachment; filename="certificado_${data.documento_fianza || 'certificado'}.pdf"`,
+      });
+      res.send(pdfBuffer);
     });
 
-    const page = await browser.newPage();
-    await page.setContent(htmlContent, { waitUntil: 'networkidle0' });
+    // 🔹 Logo centrado
+    const logoPath = path.join(__dirname, '../public/logo.png'); // asegúrate que exista en public
+    doc.image(logoPath, { fit: [120, 120], align: 'center' });
 
-    const pdfBuffer = await page.pdf({ format: 'A4' });
-    await browser.close();
+    doc.moveDown(2).fontSize(18).text('CERTIFICADO DE FIANZA', { align: 'center' });
+    doc.moveDown();
 
-    res.set({
-      'Content-Type': 'application/pdf',
-      'Content-Disposition': `attachment; filename="certificado_${data.documento_fianza || 'certificado'}.pdf"`,
+    // 🔹 Datos de expedición
+    doc.fontSize(14).text('Datos de Expedición', { underline: true });
+    doc.fontSize(12).text(`Ciudad: ${data.ciudad_expedicion}`);
+    doc.text(`Fecha: ${data.fecha_expedicion}`);
+    doc.text(`Número de Fianza: ${data.documento_fianza}`);
+    doc.text(`Anexo: ${data.anexo}`);
+    doc.moveDown();
+
+    // 🔹 Contratante
+    doc.fontSize(14).text('Contratante', { underline: true });
+    doc.fontSize(12).text(`Nombre: ${data.contratante}`);
+    doc.text(`NIT: ${data.contratante_nit}`);
+    doc.text(`Dirección: ${data.contratante_direccion}`);
+    doc.text(`Teléfono: ${data.contratante_tel}`);
+    doc.text(`Ciudad: ${data.contratante_ciudad}`);
+    doc.moveDown();
+
+    // 🔹 Afianzado
+    doc.fontSize(14).text('Afianzado', { underline: true });
+    doc.fontSize(12).text(`Nombre: ${data.afianzado}`);
+    doc.text(`NIT: ${data.afianzado_nit}`);
+    doc.text(`Dirección: ${data.afianzado_direccion}`);
+    doc.text(`Teléfono: ${data.afianzado_tel}`);
+    doc.text(`Ciudad: ${data.afianzado_ciudad}`);
+    doc.moveDown();
+
+    // 🔹 Beneficiario
+    doc.fontSize(14).text('Beneficiario', { underline: true });
+    doc.fontSize(12).text(`Nombre: ${data.beneficiario}`);
+    doc.text(`NIT: ${data.beneficiario_nit}`);
+    doc.text(`Dirección: ${data.beneficiario_direccion}`);
+    doc.text(`Teléfono: ${data.beneficiario_tel}`);
+    doc.text(`Ciudad: ${data.beneficiario_ciudad}`);
+    doc.moveDown();
+
+    // 🔹 Fianzas (lista simple)
+    doc.fontSize(14).text('Fianzas', { underline: true });
+    data.fianzas.forEach((f, i) => {
+      doc.fontSize(12).text(
+        `${i + 1}. Tipo: ${f.tipo} | Valor: ${f.valor} | Desde: ${f.desde} | Hasta: ${f.hasta}`
+      );
     });
-    res.send(pdfBuffer);
+    doc.moveDown();
+
+    // 🔹 Costos
+    doc.fontSize(14).text('Costos', { underline: true });
+    doc.fontSize(12).text(`Total Afianzado: ${data.total_afianzado}`);
+    doc.text(`Costo Neto: ${data.costo_neto}`);
+    doc.text(`Costos Admin: ${data.costos_admin}`);
+    doc.text(`IVA: ${data.iva}`);
+    doc.text(`Total a Pagar: ${data.total_pagar}`);
+    doc.moveDown();
+
+    // 🔹 Otros
+    doc.fontSize(14).text('Otros Datos', { underline: true });
+    doc.fontSize(12).text(`Clave: ${data.clave}`);
+    doc.text(`Asesor: ${data.asesor}`);
+    doc.text(`% Participación: ${data.participacion}`);
+    doc.text(`Centro PDR: ${data.centro_pdr}`);
+
+    // 🔹 Finalizar
+    doc.end();
 
   } catch (err) {
-    console.error('Error en /generar-certificado:', err);
-    res.status(500).json({ mensaje: 'Error generando certificado', detalle: err.message });
+    console.error('❌ Error generando PDF:', err);
+    res.status(500).json({ mensaje: 'Error generando certificado' });
   }
 });
 
 module.exports = router;
+
