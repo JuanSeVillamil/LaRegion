@@ -1,6 +1,8 @@
 const express = require('express');
 const router = express.Router();
 const PDFDocument = require('pdfkit');
+const path = require('path');
+const fs = require('fs');
 
 router.post('/generar-certificado', async (req, res) => {
   try {
@@ -19,8 +21,21 @@ router.post('/generar-certificado', async (req, res) => {
       res.send(pdfBuffer);
     });
 
-    // 🔹 Título (sin logo por ahora)
-    doc.fontSize(20).text('CERTIFICADO DE FIANZA', { align: 'center' });
+    // 🔹 Logo con validación
+    try {
+      const logoPath = path.join(__dirname, '../public/logo.png');
+      if (fs.existsSync(logoPath)) {
+        doc.image(logoPath, { fit: [120, 120], align: 'center' });
+      } else {
+        console.warn("⚠️ Logo no encontrado en:", logoPath);
+        doc.fontSize(16).text('AFIANZADORA LA REGIONAL', { align: 'center' });
+      }
+    } catch (e) {
+      console.error("❌ Error cargando logo:", e.message);
+      doc.fontSize(16).text('AFIANZADORA LA REGIONAL', { align: 'center' });
+    }
+
+    doc.moveDown(2).fontSize(18).text('CERTIFICADO DE FIANZA', { align: 'center' });
     doc.moveDown();
 
     // 🔹 Datos de expedición
@@ -58,15 +73,13 @@ router.post('/generar-certificado', async (req, res) => {
     doc.text(`Ciudad: ${data.beneficiario_ciudad}`);
     doc.moveDown();
 
-    // 🔹 Fianzas
+    // 🔹 Fianzas (lista simple)
     doc.fontSize(14).text('Fianzas', { underline: true });
-    if (Array.isArray(data.fianzas)) {
-      data.fianzas.forEach((f, i) => {
-        doc.fontSize(12).text(
-          `${i + 1}. Tipo: ${f.tipo} | Valor: ${f.valor} | Desde: ${f.desde} | Hasta: ${f.hasta}`
-        );
-      });
-    }
+    (data.fianzas || []).forEach((f, i) => {
+      doc.fontSize(12).text(
+        `${i + 1}. Tipo: ${f.tipo} | Valor: ${f.valor} | Desde: ${f.desde} | Hasta: ${f.hasta}`
+      );
+    });
     doc.moveDown();
 
     // 🔹 Costos
@@ -85,7 +98,7 @@ router.post('/generar-certificado', async (req, res) => {
     doc.text(`% Participación: ${data.participacion}`);
     doc.text(`Centro PDR: ${data.centro_pdr}`);
 
-    // Finalizar
+    // 🔹 Finalizar
     doc.end();
 
   } catch (err) {
