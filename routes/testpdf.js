@@ -1,10 +1,10 @@
 const express = require('express');
-const router = express.Router();
 const PDFDocument = require('pdfkit');
+const router = express.Router();
 
-router.get('/test-pdf', (req, res) => {
+router.post('/test/generar-test', async (req, res) => {
   try {
-    const doc = new PDFDocument({ margin: 50 });
+    const doc = new PDFDocument();
     let buffers = [];
     doc.on('data', buffers.push.bind(buffers));
     doc.on('end', () => {
@@ -16,19 +16,12 @@ router.get('/test-pdf', (req, res) => {
       res.send(pdfBuffer);
     });
 
-    // Contenido mínimo
-    doc.fontSize(20).text('🚀 PDF de prueba en Render', { align: 'center' });
-    doc.moveDown();
-    doc.fontSize(14).text('Si ves este archivo, significa que PDFKit funciona en producción.');
-    doc.moveDown();
-    doc.text('Fecha: ' + new Date().toLocaleString());
+    doc.fontSize(20).text('✅ PDF generado correctamente en Render', 100, 100);
 
-    // Finalizar
     doc.end();
-
   } catch (err) {
-    console.error('❌ Error en /test-pdf:', err);
-    res.status(500).json({ mensaje: 'Error generando PDF de prueba' });
+    console.error('❌ Error generando PDF:', err);
+    res.status(500).json({ mensaje: 'Error generando test PDF' });
   }
 });
 
