@@ -118,7 +118,7 @@
       <div class="campo"><label>Centro PDR:</label><input type="text" id="centro_pdr" /></div>
     </div>
 
-    <button type="submit" class="btn-submit">Generar PDF</button>
+    <button type="submit" class="btn-submit">Guardar y Ver Certificado</button>
   </form>
 
   <script>
@@ -187,25 +187,20 @@
       };
 
       try {
-        const res = await fetch('/certificados/generar-certificado', {
+        // Guardar en BD
+        const res = await fetch('/agregar-certificado', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify(payload)
         });
 
-        if (!res.ok) {
-          const err = await res.json().catch(()=>null);
-          alert('Error generando PDF: ' + (err?.mensaje || res.statusText));
-          return;
+        const data = await res.json();
+        if (data.exito) {
+          // Redirigir a la vista del certificado
+          window.location.href = `vista-certificado.html?numero=${payload.documento_fianza}`;
+        } else {
+          alert('Error al guardar: ' + (data.mensaje || ''));
         }
-
-        const blob = await res.blob();
-        const url = window.URL.createObjectURL(blob);
-        const a = document.createElement('a');
-        a.href = url;
-        a.download = `certificado_${payload.documento_fianza || 'certificado'}.pdf`;
-        a.click();
-        window.URL.revokeObjectURL(url);
       } catch (error) {
         console.error(error);
         alert('Error al conectar con el servidor');

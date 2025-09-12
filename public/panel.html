@@ -4,42 +4,11 @@
   <meta charset="UTF-8">
   <title>Panel del Administrador</title>
   <link rel="stylesheet" href="style.css">
-  <link rel="icon" type="image/png" href="media/icono.png">
-  <link rel="icon" type="image/png" href="/favicon-96x96.png" sizes="96x96" />
-  <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
-  <link rel="shortcut icon" href="/favicon.ico" />
-  <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png" />
-  <meta name="apple-mobile-web-app-title" content="La Regional" />
-  <link rel="manifest" href="/site.webmanifest" />
 </head>
 <body>
   <h1>Panel de Administración</h1>
   <button id="btn-logout">Cerrar sesión</button>
-
-  <!-- Formulario para agregar o actualizar un número -->
-  <form id="form-agregar">
-    <input type="text" id="nuevo-numero" placeholder="Número" required>
-    <select id="nuevo-estado">
-      <option value="Aprobado">Aprobado</option>
-      <option value="No aprobado">No aprobado</option>
-    </select>
-    <input type="text" id="nuevo-contratante" placeholder="Contratante">
-    <input type="text" id="nuevo-beneficiario" placeholder="Beneficiario">
-    <input type="text" id="nuevo-contratante-direccion" placeholder="Dirección del Contratante">
-    <input type="text" id="nuevo-contratante-ciudad" placeholder="Ciudad">
-    <input type="date" id="nueva-fecha-expedicion" placeholder="Fecha de expedición">
-    <button type="submit">Agregar / Actualizar</button>
-  </form>
-  <p id="mensaje-agregar"></p>
-
-  <hr>
-
-  <h2>Cambiar Contraseña</h2>
-  <form id="form-cambiar-contrasena">
-    <input type="password" id="contrasena-nueva" placeholder="Nueva contraseña" required />
-    <button type="submit">Actualizar contraseña</button>
-  </form>
-  <p id="mensaje-contrasena"></p>
+  <button id="btn-agregar">➕ Agregar nuevo certificado</button>
 
   <hr>
 
@@ -49,14 +18,11 @@
       <tr>
         <th>Eliminar</th>
         <th>Número</th>
-        <th>Estado actual</th>
+        <th>Estado</th>
         <th>Contratante</th>
         <th>Beneficiario</th>
-        <th>Dirección</th>
         <th>Ciudad</th>
         <th>Fecha Expedición</th>
-        <th>Nuevo estado</th>
-        <th>Actualizar</th>
       </tr>
     </thead>
     <tbody></tbody>
@@ -64,6 +30,7 @@
 
   <script>
     document.addEventListener('DOMContentLoaded', async () => {
+      // 🔹 Verificar sesión
       try {
         const res = await fetch('/verificar-sesion');
         const data = await res.json();
@@ -72,92 +39,35 @@
           window.location.href = 'login.html';
           return;
         }
-
         cargarNumeros();
-
-        document.getElementById('form-agregar').addEventListener('submit', async function (e) {
-          e.preventDefault();
-          const numero = document.getElementById('nuevo-numero').value;
-          const estado = document.getElementById('nuevo-estado').value;
-          const contratante = document.getElementById('nuevo-contratante').value;
-          const beneficiario = document.getElementById('nuevo-beneficiario').value;
-          const contratante_direccion = document.getElementById('nuevo-contratante-direccion').value;
-          const contratante_ciudad = document.getElementById('nuevo-contratante-ciudad').value;
-          const fecha_expedicion = document.getElementById('nueva-fecha-expedicion').value;
-
-          const res = await fetch('/agregar', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ numero, estado, contratante, beneficiario, contratante_direccion, contratante_ciudad, fecha_expedicion })
-          });
-
-          const data = await res.json();
-          const mensaje = document.getElementById('mensaje-agregar');
-          if (data.exito) {
-            mensaje.innerText = 'Número agregado/actualizado correctamente';
-            document.getElementById('form-agregar').reset();
-            cargarNumeros();
-          } else {
-            mensaje.innerText = 'Error: ' + data.mensaje;
-          }
-        });
-
-        document.getElementById('form-cambiar-contrasena').addEventListener('submit', async e => {
-          e.preventDefault();
-          const contrasenaNueva = document.getElementById('contrasena-nueva').value.trim();
-          const mensaje = document.getElementById('mensaje-contrasena');
-          if (!contrasenaNueva) {
-            mensaje.style.color = 'red';
-            mensaje.textContent = 'Ingrese una nueva contraseña.';
-            return;
-          }
-
-          try {
-            const res = await fetch('/cambiar-contrasena', {
-              method: 'POST',
-              headers: { 'Content-Type': 'application/json' },
-              body: JSON.stringify({ usuario: 'admin', contrasenaNueva })
-            });
-            const data = await res.json();
-
-            if (data.exito) {
-              mensaje.style.color = 'green';
-              mensaje.textContent = data.mensaje;
-              document.getElementById('form-cambiar-contrasena').reset();
-              cargarNumeros();
-            } else {
-              mensaje.style.color = 'red';
-              mensaje.textContent = data.mensaje || 'Error al actualizar contraseña.';
-            }
-          } catch (error) {
-            mensaje.style.color = 'red';
-            mensaje.textContent = 'Error al conectar con el servidor.';
-            console.error(error);
-          }
-        });
-
-        document.getElementById('btn-logout').addEventListener('click', async () => {
-          try {
-            const res = await fetch('/logout', { method: 'POST', credentials: 'include' });
-            const data = await res.json();
-
-            if (data.mensaje) {
-              alert('Sesión cerrada correctamente');
-              window.location.href = 'login.html';
-            }
-          } catch (error) {
-            console.error('Error al cerrar sesión:', error);
-            alert('No se pudo cerrar sesión');
-          }
-        });
-
       } catch (error) {
         console.error('Error al verificar sesión:', error);
         alert('Error al verificar sesión. Redirigiendo al login.');
         window.location.href = 'login.html';
       }
+
+      // 🔹 Botón para ir a certificado.html
+      document.getElementById('btn-agregar').addEventListener('click', () => {
+        window.location.href = 'certificado.html';
+      });
+
+      // 🔹 Logout
+      document.getElementById('btn-logout').addEventListener('click', async () => {
+        try {
+          const res = await fetch('/logout', { method: 'POST', credentials: 'include' });
+          const data = await res.json();
+          if (data.mensaje) {
+            alert('Sesión cerrada correctamente');
+            window.location.href = 'login.html';
+          }
+        } catch (error) {
+          console.error('Error al cerrar sesión:', error);
+          alert('No se pudo cerrar sesión');
+        }
+      });
     });
 
+    // 🔹 Cargar registros en tabla
     async function cargarNumeros() {
       const res = await fetch('/todos');
       const data = await res.json();
@@ -165,64 +75,23 @@
       const tbody = document.querySelector('#tabla-estados tbody');
       tbody.innerHTML = '';
 
-      data.forEach(({ numero, estado, contratante, beneficiario, contratante_direccion, contratante_ciudad, fecha_expedicion }) => {
+      data.forEach(({ numero, estado, contratante, beneficiario, contratante_ciudad, fecha_expedicion }) => {
         const fila = document.createElement('tr');
         fila.innerHTML = `
-          <td><button class="btn-eliminar" onclick="eliminarNumero('${numero}', this)">Eliminar</button></td>
-          <td><input type="text" class="input-numero" value="${numero}"></td>
+          <td><button onclick="eliminarNumero('${numero}')">Eliminar</button></td>
+          <td>${numero}</td>
           <td>${estado}</td>
-          <td><input type="text" class="input-contratante" value="${contratante || ''}"></td>
-          <td><input type="text" class="input-beneficiario" value="${beneficiario || ''}"></td>
-          <td><input type="text" class="input-direccion" value="${contratante_direccion || ''}"></td>
-          <td><input type="text" class="input-ciudad" value="${contratante_ciudad || ''}"></td>
-          <td><input type="date" class="input-fecha" value="${fecha_expedicion ? fecha_expedicion.split('T')[0] : ''}"></td>
-          <td>
-            <select>
-              <option value="Aprobado" ${estado === 'Aprobado' ? 'selected' : ''}>Aprobado</option>
-              <option value="No aprobado" ${estado === 'No aprobado' ? 'selected' : ''}>No aprobado</option>
-            </select>
-          </td>
-          <td><button onclick="actualizarEstado('${numero}', this)">Actualizar</button></td>
+          <td>${contratante || ''}</td>
+          <td>${beneficiario || ''}</td>
+          <td>${contratante_ciudad || ''}</td>
+          <td>${fecha_expedicion ? fecha_expedicion.split('T')[0] : ''}</td>
         `;
         tbody.appendChild(fila);
       });
     }
 
-    async function actualizarEstado(numeroAntiguo, btn) {
-      const fila = btn.closest('tr');
-      const nuevoNumero = fila.querySelector('.input-numero').value.trim();
-      const estado = fila.querySelector('select').value;
-      const contratante = fila.querySelector('.input-contratante').value;
-      const beneficiario = fila.querySelector('.input-beneficiario').value;
-      const contratante_direccion = fila.querySelector('.input-direccion').value;
-      const contratante_ciudad = fila.querySelector('.input-ciudad').value;
-      const fecha_expedicion = fila.querySelector('.input-fecha').value;
-
-      const res = await fetch('/agregar', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          numero: nuevoNumero,
-          estado,
-          contratante,
-          beneficiario,
-          contratante_direccion,
-          contratante_ciudad,
-          fecha_expedicion,
-          numero_original: numeroAntiguo
-        })
-      });
-
-      const data = await res.json();
-      if (data.exito) {
-        alert("Datos actualizados correctamente");
-        cargarNumeros();
-      } else {
-        alert("Error al actualizar datos");
-      }
-    }
-
-    async function eliminarNumero(numero, btn) {
+    // 🔹 Eliminar un registro
+    async function eliminarNumero(numero) {
       if (!confirm(`¿Seguro que quieres eliminar el número ${numero}?`)) return;
 
       try {
@@ -244,8 +113,124 @@
         console.error(error);
       }
     }
-
   </script>
 </body>
 </html>
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <title>Panel del Administrador</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <h1>Panel de Administración</h1>
+  <button id="btn-logout">Cerrar sesión</button>
+  <button id="btn-agregar">➕ Agregar nuevo certificado</button>
 
+  <hr>
+
+  <h2>Lista de números registrados</h2>
+  <table border="1" id="tabla-estados">
+    <thead>
+      <tr>
+        <th>Eliminar</th>
+        <th>Número</th>
+        <th>Estado</th>
+        <th>Contratante</th>
+        <th>Beneficiario</th>
+        <th>Ciudad</th>
+        <th>Fecha Expedición</th>
+      </tr>
+    </thead>
+    <tbody></tbody>
+  </table>
+
+  <script>
+    document.addEventListener('DOMContentLoaded', async () => {
+      // 🔹 Verificar sesión
+      try {
+        const res = await fetch('/verificar-sesion');
+        const data = await res.json();
+        if (!data.activa) {
+          alert('Sesión no activa. Por favor inicia sesión.');
+          window.location.href = 'login.html';
+          return;
+        }
+        cargarNumeros();
+      } catch (error) {
+        console.error('Error al verificar sesión:', error);
+        alert('Error al verificar sesión. Redirigiendo al login.');
+        window.location.href = 'login.html';
+      }
+
+      // 🔹 Botón para ir a certificado.html
+      document.getElementById('btn-agregar').addEventListener('click', () => {
+        window.location.href = 'certificado.html';
+      });
+
+      // 🔹 Logout
+      document.getElementById('btn-logout').addEventListener('click', async () => {
+        try {
+          const res = await fetch('/logout', { method: 'POST', credentials: 'include' });
+          const data = await res.json();
+          if (data.mensaje) {
+            alert('Sesión cerrada correctamente');
+            window.location.href = 'login.html';
+          }
+        } catch (error) {
+          console.error('Error al cerrar sesión:', error);
+          alert('No se pudo cerrar sesión');
+        }
+      });
+    });
+
+    // 🔹 Cargar registros en tabla
+    async function cargarNumeros() {
+      const res = await fetch('/todos');
+      const data = await res.json();
+
+      const tbody = document.querySelector('#tabla-estados tbody');
+      tbody.innerHTML = '';
+
+      data.forEach(({ numero, estado, contratante, beneficiario, contratante_ciudad, fecha_expedicion }) => {
+        const fila = document.createElement('tr');
+        fila.innerHTML = `
+          <td><button onclick="eliminarNumero('${numero}')">Eliminar</button></td>
+          <td>${numero}</td>
+          <td>${estado}</td>
+          <td>${contratante || ''}</td>
+          <td>${beneficiario || ''}</td>
+          <td>${contratante_ciudad || ''}</td>
+          <td>${fecha_expedicion ? fecha_expedicion.split('T')[0] : ''}</td>
+        `;
+        tbody.appendChild(fila);
+      });
+    }
+
+    // 🔹 Eliminar un registro
+    async function eliminarNumero(numero) {
+      if (!confirm(`¿Seguro que quieres eliminar el número ${numero}?`)) return;
+
+      try {
+        const res = await fetch('/eliminar', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ numero })
+        });
+        const data = await res.json();
+
+        if (data.exito) {
+          alert('Número eliminado correctamente');
+          cargarNumeros();
+        } else {
+          alert('Error al eliminar número: ' + (data.mensaje || ''));
+        }
+      } catch (error) {
+        alert('Error al conectar con el servidor');
+        console.error(error);
+      }
+    }
+  </script>
+</body>
+</html>
