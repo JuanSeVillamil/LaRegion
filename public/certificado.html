@@ -197,7 +197,7 @@
         const data = await res.json();
         if (data.exito) {
           // Redirigir a la vista del certificado
-          window.location.href = `vista-certificado.html?numero=${payload.documento_fianza}`;
+          window.location.href = `/certificados/vista-certificado.html?numero=${payload.documento_fianza}`;
         } else {
           alert('Error al guardar: ' + (data.mensaje || ''));
         }
