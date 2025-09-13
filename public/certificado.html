@@ -188,7 +188,7 @@
 
       try {
         // Guardar en BD
-        const res = await fetch('/agregar-certificado', {
+        const res = await fetch('/guardar-certificado', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify(payload)
