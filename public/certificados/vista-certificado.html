@@ -1,79 +1,99 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-  <meta charset="UTF-8" />
+  <meta charset="UTF-8">
   <title>Vista Certificado</title>
   <style>
-    body {
-      font-family: 'Times New Roman', serif;
-      margin: 40px;
-      background: #f5f5f5;
+    @page {
+      size: letter;
+      margin: 2cm;
     }
-    .certificado {
-      width: 210mm;
-      min-height: 297mm;
-      margin: auto;
+
+    body {
+      font-family: Arial, sans-serif;
+      margin: 0;
       padding: 40px;
       background: #fff;
-      border: 2px solid #000;
-      box-shadow: 0 0 10px rgba(0,0,0,0.3);
+      position: relative;
     }
-    header {
+
+    /* Marca de agua */
+    body::before {
+      content: "";
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: url("media/watermark.png") no-repeat center;
+      background-size: 60%;
+      opacity: 0.1;
+      z-index: -1;
+    }
+
+    /* Encabezado con logo */
+    .encabezado {
       display: flex;
       align-items: center;
-      justify-content: space-between;
-      border-bottom: 2px solid #000;
-      padding-bottom: 10px;
       margin-bottom: 20px;
     }
-    header img {
-      height: 70px;
+    .encabezado img {
+      height: 80px;
+      margin-right: 20px;
     }
-    h1 {
-      text-align: center;
-      text-transform: uppercase;
-      font-size: 22px;
+    .encabezado h1 {
+      font-size: 20px;
       margin: 0;
     }
+
+    h2 {
+      text-align: center;
+      margin: 20px 0;
+      text-transform: uppercase;
+    }
+
     .seccion {
       margin-bottom: 15px;
     }
+
     .seccion h3 {
-      background: #eee;
-      padding: 5px;
-      font-size: 16px;
-      border: 1px solid #ccc;
+      border-bottom: 1px solid #000;
+      padding-bottom: 4px;
+      margin-bottom: 8px;
+      font-size: 14px;
     }
+
     .campo {
       margin: 4px 0;
+      font-size: 13px;
     }
+
     .campo strong {
       display: inline-block;
-      width: 200px;
+      width: 180px;
     }
+
+    /* Tabla fianzas */
     table {
       width: 100%;
       border-collapse: collapse;
       margin-top: 10px;
+      font-size: 12px;
     }
-    table th, table td {
-      border: 1px solid #000;
+    table, th, td {
+      border: 1px solid #333;
+    }
+    th, td {
       padding: 6px;
       text-align: center;
     }
-    footer {
-      margin-top: 30px;
+
+    /* Botón imprimir */
+    .acciones {
       text-align: center;
-      font-size: 12px;
+      margin-top: 30px;
     }
-    @media print {
-      body { background: none; margin: 0; }
-      .certificado { border: none; box-shadow: none; }
-      button { display: none; }
-    }
-    button {
-      margin: 20px auto;
-      display: block;
+    .acciones button {
       padding: 10px 20px;
       background: #27ae60;
       color: #fff;
@@ -81,138 +101,144 @@
       border-radius: 4px;
       cursor: pointer;
     }
+    .acciones button:hover {
+      background: #219150;
+    }
   </style>
 </head>
 <body>
-  <div class="certificado">
-    <header>
-      <img src="/logo.png" alt="Logo">
-      <h1>Certificado de Fianza</h1>
-      <div></div>
-    </header>
-
-    <div class="seccion">
-      <h3>Datos de Expedición</h3>
-      <div class="campo"><strong>Ciudad:</strong> <span id="ciudad_expedicion"></span></div>
-      <div class="campo"><strong>Fecha:</strong> <span id="fecha_expedicion"></span></div>
-      <div class="campo"><strong>No. Fianza:</strong> <span id="documento_fianza"></span></div>
-      <div class="campo"><strong>Anexo:</strong> <span id="anexo"></span></div>
-    </div>
-
-    <div class="seccion">
-      <h3>Contratante</h3>
-      <div class="campo"><strong>Nombre:</strong> <span id="contratante"></span></div>
-      <div class="campo"><strong>NIT:</strong> <span id="contratante_nit"></span></div>
-      <div class="campo"><strong>Dirección:</strong> <span id="contratante_direccion"></span></div>
-      <div class="campo"><strong>Teléfono:</strong> <span id="contratante_tel"></span></div>
-      <div class="campo"><strong>Ciudad:</strong> <span id="contratante_ciudad"></span></div>
-    </div>
-
-    <div class="seccion">
-      <h3>Afianzado</h3>
-      <div class="campo"><strong>Nombre:</strong> <span id="afianzado"></span></div>
-      <div class="campo"><strong>NIT:</strong> <span id="afianzado_nit"></span></div>
-      <div class="campo"><strong>Dirección:</strong> <span id="afianzado_direccion"></span></div>
-      <div class="campo"><strong>Teléfono:</strong> <span id="afianzado_tel"></span></div>
-      <div class="campo"><strong>Ciudad:</strong> <span id="afianzado_ciudad"></span></div>
-    </div>
-
-    <div class="seccion">
-      <h3>Beneficiario</h3>
-      <div class="campo"><strong>Nombre:</strong> <span id="beneficiario"></span></div>
-      <div class="campo"><strong>NIT:</strong> <span id="beneficiario_nit"></span></div>
-      <div class="campo"><strong>Dirección:</strong> <span id="beneficiario_direccion"></span></div>
-      <div class="campo"><strong>Teléfono:</strong> <span id="beneficiario_tel"></span></div>
-      <div class="campo"><strong>Ciudad:</strong> <span id="beneficiario_ciudad"></span></div>
-    </div>
-
-    <div class="seccion">
-      <h3>Objeto y Observaciones</h3>
-      <div class="campo"><strong>Objeto:</strong> <span id="objeto"></span></div>
-      <div class="campo"><strong>Observaciones:</strong> <span id="observaciones"></span></div>
-    </div>
-
-    <div class="seccion">
-      <h3>Contrato</h3>
-      <div class="campo"><strong>Valor:</strong> <span id="valor_contrato"></span></div>
-      <div class="campo"><strong>Clase:</strong> <span id="clase_contrato"></span></div>
-      <div class="campo"><strong>Pagaré:</strong> <span id="pagare"></span></div>
-    </div>
-
-    <div class="seccion">
-      <h3>Fianzas</h3>
-      <table id="tabla-fianzas">
-        <thead>
-          <tr><th>Tipo</th><th>Valor</th><th>Desde</th><th>Hasta</th></tr>
-        </thead>
-        <tbody></tbody>
-      </table>
-    </div>
-
-    <div class="seccion">
-      <h3>Costos</h3>
-      <div class="campo"><strong>Total Afianzado:</strong> <span id="total_afianzado"></span></div>
-      <div class="campo"><strong>Costo Neto:</strong> <span id="costo_neto"></span></div>
-      <div class="campo"><strong>Costos Admin:</strong> <span id="costos_admin"></span></div>
-      <div class="campo"><strong>IVA:</strong> <span id="iva"></span></div>
-      <div class="campo"><strong>Total a Pagar:</strong> <span id="total_pagar"></span></div>
-    </div>
-
-    <div class="seccion">
-      <h3>Otros Datos</h3>
-      <div class="campo"><strong>Clave:</strong> <span id="clave"></span></div>
-      <div class="campo"><strong>Asesor:</strong> <span id="asesor"></span></div>
-      <div class="campo"><strong>% Participación:</strong> <span id="participacion"></span></div>
-      <div class="campo"><strong>Centro PDR:</strong> <span id="centro_pdr"></span></div>
-    </div>
-
-    <footer>
-      <p>Afianzadora La Regional - Este documento es generado automáticamente</p>
-    </footer>
+  <!-- Encabezado -->
+  <div class="encabezado">
+    <img src="media/logo.png" alt="Logo">
+    <h1>AFIANZADORA LA REGIONAL</h1>
   </div>
 
-  <button onclick="window.print()">Imprimir / Guardar PDF</button>
+  <h2>Certificado de Fianza</h2>
+
+  <!-- Datos principales -->
+  <div class="seccion">
+    <h3>Datos de Expedición</h3>
+    <div class="campo"><strong>Ciudad:</strong> <span id="ciudad_expedicion"></span></div>
+    <div class="campo"><strong>Fecha:</strong> <span id="fecha_expedicion"></span></div>
+    <div class="campo"><strong>Número de Fianza:</strong> <span id="documento_fianza"></span></div>
+    <div class="campo"><strong>Anexo:</strong> <span id="anexo"></span></div>
+  </div>
+
+  <div class="seccion">
+    <h3>Contratante</h3>
+    <div class="campo"><strong>Nombre:</strong> <span id="contratante"></span></div>
+    <div class="campo"><strong>NIT:</strong> <span id="contratante_nit"></span></div>
+    <div class="campo"><strong>Dirección:</strong> <span id="contratante_direccion"></span></div>
+    <div class="campo"><strong>Teléfono:</strong> <span id="contratante_tel"></span></div>
+    <div class="campo"><strong>Ciudad:</strong> <span id="contratante_ciudad"></span></div>
+  </div>
+
+  <div class="seccion">
+    <h3>Afianzado</h3>
+    <div class="campo"><strong>Nombre:</strong> <span id="afianzado"></span></div>
+    <div class="campo"><strong>NIT:</strong> <span id="afianzado_nit"></span></div>
+    <div class="campo"><strong>Dirección:</strong> <span id="afianzado_direccion"></span></div>
+    <div class="campo"><strong>Teléfono:</strong> <span id="afianzado_tel"></span></div>
+    <div class="campo"><strong>Ciudad:</strong> <span id="afianzado_ciudad"></span></div>
+  </div>
+
+  <div class="seccion">
+    <h3>Beneficiario</h3>
+    <div class="campo"><strong>Nombre:</strong> <span id="beneficiario"></span></div>
+    <div class="campo"><strong>NIT:</strong> <span id="beneficiario_nit"></span></div>
+    <div class="campo"><strong>Dirección:</strong> <span id="beneficiario_direccion"></span></div>
+    <div class="campo"><strong>Teléfono:</strong> <span id="beneficiario_tel"></span></div>
+    <div class="campo"><strong>Ciudad:</strong> <span id="beneficiario_ciudad"></span></div>
+  </div>
+
+  <div class="seccion">
+    <h3>Objeto y Observaciones</h3>
+    <div class="campo"><strong>Objeto:</strong> <span id="objeto"></span></div>
+    <div class="campo"><strong>Observaciones:</strong> <span id="observaciones"></span></div>
+  </div>
+
+  <div class="seccion">
+    <h3>Contrato</h3>
+    <div class="campo"><strong>Valor:</strong> <span id="valor_contrato"></span></div>
+    <div class="campo"><strong>Clase:</strong> <span id="clase_contrato"></span></div>
+    <div class="campo"><strong>Pagaré:</strong> <span id="pagare"></span></div>
+  </div>
+
+  <div class="seccion">
+    <h3>Fianzas</h3>
+    <table id="tabla-fianzas">
+      <thead>
+        <tr>
+          <th>Tipo</th>
+          <th>Valor</th>
+          <th>Desde</th>
+          <th>Hasta</th>
+        </tr>
+      </thead>
+      <tbody></tbody>
+    </table>
+  </div>
+
+  <div class="seccion">
+    <h3>Costos</h3>
+    <div class="campo"><strong>Total Afianzado:</strong> <span id="total_afianzado"></span></div>
+    <div class="campo"><strong>Costo Neto:</strong> <span id="costo_neto"></span></div>
+    <div class="campo"><strong>Costos Admin:</strong> <span id="costos_admin"></span></div>
+    <div class="campo"><strong>IVA:</strong> <span id="iva"></span></div>
+    <div class="campo"><strong>Total a Pagar:</strong> <span id="total_pagar"></span></div>
+  </div>
+
+  <div class="seccion">
+    <h3>Otros Datos</h3>
+    <div class="campo"><strong>Clave:</strong> <span id="clave"></span></div>
+    <div class="campo"><strong>Asesor:</strong> <span id="asesor"></span></div>
+    <div class="campo"><strong>% Participación:</strong> <span id="participacion"></span></div>
+    <div class="campo"><strong>Centro PDR:</strong> <span id="centro_pdr"></span></div>
+  </div>
+
+  <div class="acciones">
+    <button onclick="window.print()">Imprimir / Guardar PDF</button>
+  </div>
 
   <script>
-    async function cargarCertificado() {
-      const params = new URLSearchParams(window.location.search);
-      const numero = params.get('numero');
-      if (!numero) {
-        alert("No se especificó número de fianza");
-        return;
-      }
+    // Obtener el número de fianza desde la URL
+    const params = new URLSearchParams(window.location.search);
+    const numero = params.get("numero");
 
+    async function cargarCertificado() {
       try {
         const res = await fetch(`/certificados/${numero}`);
-        if (!res.ok) throw new Error("Error obteniendo datos");
-
+        if (!res.ok) {
+          alert("Error cargando certificado");
+          return;
+        }
         const data = await res.json();
 
         for (const key in data) {
-          const el = document.getElementById(key);
-          if (el) el.textContent = data[key];
+          if (document.getElementById(key)) {
+            document.getElementById(key).innerText = data[key];
+          }
         }
 
-        // Fianzas (JSONB en la BD)
-        const tbody = document.querySelector("#tabla-fianzas tbody");
-        if (data.fianzas) {
-          const fianzas = Array.isArray(data.fianzas) ? data.fianzas : JSON.parse(data.fianzas);
-          fianzas.forEach(f => {
+        // Rellenar tabla de fianzas
+        if (data.fianzas && Array.isArray(data.fianzas)) {
+          const tbody = document.querySelector("#tabla-fianzas tbody");
+          data.fianzas.forEach(f => {
             const tr = document.createElement("tr");
             tr.innerHTML = `
-              <td>${f.tipo || ''}</td>
-              <td>${f.valor || ''}</td>
-              <td>${f.desde || ''}</td>
-              <td>${f.hasta || ''}</td>
+              <td>${f.tipo}</td>
+              <td>${f.valor}</td>
+              <td>${f.desde}</td>
+              <td>${f.hasta}</td>
             `;
             tbody.appendChild(tr);
           });
         }
-      } catch (err) {
-        console.error(err);
-        alert("Error cargando certificado");
+      } catch (error) {
+        console.error(error);
       }
     }
+
     cargarCertificado();
   </script>
 </body>
