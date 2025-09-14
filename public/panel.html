@@ -12,13 +12,12 @@
 
   <hr>
 
-  <h2>Lista de números registrados</h2>
-  <table border="1" id="tabla-estados">
+  <h2>Lista de Certificados Registrados</h2>
+  <table border="1" id="tabla-certificados">
     <thead>
       <tr>
         <th>Eliminar</th>
         <th>Número</th>
-        <th>Estado</th>
         <th>Contratante</th>
         <th>Beneficiario</th>
         <th>Ciudad</th>
@@ -39,7 +38,7 @@
           window.location.href = 'login.html';
           return;
         }
-        cargarNumeros();
+        cargarCertificados();
       } catch (error) {
         console.error('Error al verificar sesión:', error);
         alert('Error al verificar sesión. Redirigiendo al login.');
@@ -67,20 +66,19 @@
       });
     });
 
-    // 🔹 Cargar registros en tabla
-    async function cargarNumeros() {
-      const res = await fetch('/todos');
+    // 🔹 Cargar certificados en tabla
+    async function cargarCertificados() {
+      const res = await fetch('/certificados-todos');
       const data = await res.json();
 
-      const tbody = document.querySelector('#tabla-estados tbody');
+      const tbody = document.querySelector('#tabla-certificados tbody');
       tbody.innerHTML = '';
 
-      data.forEach(({ numero, estado, contratante, beneficiario, contratante_ciudad, fecha_expedicion }) => {
+      data.forEach(({ numero, contratante, beneficiario, contratante_ciudad, fecha_expedicion }) => {
         const fila = document.createElement('tr');
         fila.innerHTML = `
-          <td><button onclick="eliminarNumero('${numero}')">Eliminar</button></td>
+          <td><button onclick="eliminarCertificado('${numero}')">Eliminar</button></td>
           <td>${numero}</td>
-          <td>${estado}</td>
           <td>${contratante || ''}</td>
           <td>${beneficiario || ''}</td>
           <td>${contratante_ciudad || ''}</td>
@@ -90,12 +88,12 @@
       });
     }
 
-    // 🔹 Eliminar un registro
-    async function eliminarNumero(numero) {
-      if (!confirm(`¿Seguro que quieres eliminar el número ${numero}?`)) return;
+    // 🔹 Eliminar un certificado
+    async function eliminarCertificado(numero) {
+      if (!confirm(`¿Seguro que quieres eliminar el certificado con número ${numero}?`)) return;
 
       try {
-        const res = await fetch('/eliminar', {
+        const res = await fetch('/eliminar-certificado', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ numero })
@@ -103,128 +101,10 @@
         const data = await res.json();
 
         if (data.exito) {
-          alert('Número eliminado correctamente');
-          cargarNumeros();
+          alert('Certificado eliminado correctamente');
+          cargarCertificados();
         } else {
-          alert('Error al eliminar número: ' + (data.mensaje || ''));
-        }
-      } catch (error) {
-        alert('Error al conectar con el servidor');
-        console.error(error);
-      }
-    }
-  </script>
-</body>
-</html>
-<!DOCTYPE html>
-<html lang="es">
-<head>
-  <meta charset="UTF-8">
-  <title>Panel del Administrador</title>
-  <link rel="stylesheet" href="style.css">
-</head>
-<body>
-  <h1>Panel de Administración</h1>
-  <button id="btn-logout">Cerrar sesión</button>
-  <button id="btn-agregar">➕ Agregar nuevo certificado</button>
-
-  <hr>
-
-  <h2>Lista de números registrados</h2>
-  <table border="1" id="tabla-estados">
-    <thead>
-      <tr>
-        <th>Eliminar</th>
-        <th>Número</th>
-        <th>Estado</th>
-        <th>Contratante</th>
-        <th>Beneficiario</th>
-        <th>Ciudad</th>
-        <th>Fecha Expedición</th>
-      </tr>
-    </thead>
-    <tbody></tbody>
-  </table>
-
-  <script>
-    document.addEventListener('DOMContentLoaded', async () => {
-      // 🔹 Verificar sesión
-      try {
-        const res = await fetch('/verificar-sesion');
-        const data = await res.json();
-        if (!data.activa) {
-          alert('Sesión no activa. Por favor inicia sesión.');
-          window.location.href = 'login.html';
-          return;
-        }
-        cargarNumeros();
-      } catch (error) {
-        console.error('Error al verificar sesión:', error);
-        alert('Error al verificar sesión. Redirigiendo al login.');
-        window.location.href = 'login.html';
-      }
-
-      // 🔹 Botón para ir a certificado.html
-      document.getElementById('btn-agregar').addEventListener('click', () => {
-        window.location.href = 'certificado.html';
-      });
-
-      // 🔹 Logout
-      document.getElementById('btn-logout').addEventListener('click', async () => {
-        try {
-          const res = await fetch('/logout', { method: 'POST', credentials: 'include' });
-          const data = await res.json();
-          if (data.mensaje) {
-            alert('Sesión cerrada correctamente');
-            window.location.href = 'login.html';
-          }
-        } catch (error) {
-          console.error('Error al cerrar sesión:', error);
-          alert('No se pudo cerrar sesión');
-        }
-      });
-    });
-
-    // 🔹 Cargar registros en tabla
-    async function cargarNumeros() {
-      const res = await fetch('/todos');
-      const data = await res.json();
-
-      const tbody = document.querySelector('#tabla-estados tbody');
-      tbody.innerHTML = '';
-
-      data.forEach(({ numero, estado, contratante, beneficiario, contratante_ciudad, fecha_expedicion }) => {
-        const fila = document.createElement('tr');
-        fila.innerHTML = `
-          <td><button onclick="eliminarNumero('${numero}')">Eliminar</button></td>
-          <td>${numero}</td>
-          <td>${estado}</td>
-          <td>${contratante || ''}</td>
-          <td>${beneficiario || ''}</td>
-          <td>${contratante_ciudad || ''}</td>
-          <td>${fecha_expedicion ? fecha_expedicion.split('T')[0] : ''}</td>
-        `;
-        tbody.appendChild(fila);
-      });
-    }
-
-    // 🔹 Eliminar un registro
-    async function eliminarNumero(numero) {
-      if (!confirm(`¿Seguro que quieres eliminar el número ${numero}?`)) return;
-
-      try {
-        const res = await fetch('/eliminar', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ numero })
-        });
-        const data = await res.json();
-
-        if (data.exito) {
-          alert('Número eliminado correctamente');
-          cargarNumeros();
-        } else {
-          alert('Error al eliminar número: ' + (data.mensaje || ''));
+          alert('Error al eliminar certificado: ' + (data.mensaje || ''));
         }
       } catch (error) {
         alert('Error al conectar con el servidor');
