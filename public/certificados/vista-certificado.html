@@ -6,98 +6,107 @@
   <style>
     body {
       font-family: Arial, sans-serif;
-      margin: 40px;
+      margin: 10px;
+      background: #fff;
+    }
+
+    .certificado {
+      width: 216mm; /* Carta: 216 x 279 mm */
+      min-height: 279mm;
+      margin: auto;
+      padding: 15px 25px;
+      border: 1px solid #000;
       background: #fff;
       position: relative;
+      box-sizing: border-box;
+      overflow: hidden;
     }
 
     /* Marca de agua */
-    body::before {
+    .certificado::before {
       content: "";
-      position: fixed;
-      top: 25%;
+      position: absolute;
+      top: 20%;
       left: 15%;
       width: 70%;
       height: 70%;
       background: url("/watermark.png") no-repeat center;
       background-size: contain;
-      opacity: 0.1;
-      z-index: -1;
-    }
-
-    .certificado {
-      width: 210mm;
-      min-height: 297mm;
-      margin: auto;
-      padding: 30px;
-      border: 2px solid #000;
-      box-shadow: 0 0 10px rgba(0,0,0,0.3);
-      background: #fff;
+      opacity: 0.08;
+      z-index: 0;
     }
 
     header {
       display: flex;
       justify-content: space-between;
       align-items: center;
-      border-bottom: 2px solid #000;
-      padding-bottom: 10px;
-      margin-bottom: 20px;
+      border-bottom: 1px solid #000;
+      padding-bottom: 5px;
+      margin-bottom: 10px;
+      position: relative;
+      z-index: 1;
     }
 
     header img {
-      height: 80px;
+      height: 60px;
     }
 
     h1 {
       text-align: center;
-      font-size: 22px;
+      font-size: 18px;
       margin: 0;
       flex: 1;
     }
 
     .seccion {
-      margin-bottom: 20px;
+      margin-bottom: 10px;
       border-bottom: 1px solid #ccc;
-      padding-bottom: 10px;
+      padding-bottom: 5px;
+      position: relative;
+      z-index: 1;
     }
 
     .seccion h3 {
-      font-size: 16px;
+      font-size: 13px;
       border-bottom: 1px solid #000;
-      margin-bottom: 10px;
-      padding-bottom: 3px;
+      margin-bottom: 5px;
+      padding-bottom: 2px;
       text-transform: uppercase;
     }
 
     .campos {
       display: grid;
       grid-template-columns: 1fr 1fr;
-      gap: 10px 40px;
+      gap: 5px 20px;
+      font-size: 12px;
     }
 
     .campo strong {
       display: inline-block;
-      min-width: 120px;
+      min-width: 100px;
     }
 
     table {
       width: 100%;
       border-collapse: collapse;
-      margin-top: 10px;
-      font-size: 14px;
+      margin-top: 5px;
+      font-size: 12px;
     }
 
     table th, table td {
       border: 1px solid #000;
-      padding: 6px;
+      padding: 4px;
       text-align: center;
     }
 
     .firmas {
-      margin-top: 50px;
+      margin-top: 20px;
       display: flex;
-      justify-content: space-around;
+      justify-content: space-between;
       text-align: center;
+      position: relative;
+      z-index: 1;
+      font-size: 12px;
     }
 
     .firmas div {
@@ -107,38 +116,41 @@
     .firmas hr {
       border: none;
       border-top: 1px solid #000;
-      margin: 40px 0 10px 0;
+      margin: 20px 0 5px 0;
     }
 
     footer {
-      margin-top: 30px;
+      margin-top: 15px;
       text-align: center;
-      font-size: 12px;
+      font-size: 10px;
       color: #333;
+      position: relative;
+      z-index: 1;
     }
 
     @media print {
-      body { background: none; margin: 0; }
+      body { margin: 0; }
       .certificado { border: none; box-shadow: none; }
       button { display: none; }
     }
 
     button {
-      margin: 20px auto;
+      margin: 10px auto;
       display: block;
-      padding: 10px 20px;
+      padding: 6px 12px;
       background: #27ae60;
       color: #fff;
       border: none;
       border-radius: 4px;
       cursor: pointer;
+      font-size: 14px;
     }
   </style>
 </head>
 <body>
   <div class="certificado">
     <header>
-      <h1>Certificado de Fianza</h1>
+      <h1>Fianza de Cumplimiento</h1>
       <img src="/logo.png" alt="Logo">
     </header>
 
@@ -233,7 +245,7 @@
       </div>
     </div>
 
-    <!-- Sección de Firmas -->
+    <!-- Firmas -->
     <div class="firmas">
       <div>
         <hr>
@@ -248,7 +260,7 @@
     </div>
 
     <footer>
-      <p>Afianzadora La Regional - Este documento es generado automáticamente</p>
+      <p>Afianzadora La Regional - Documento generado automáticamente</p>
     </footer>
   </div>
 
