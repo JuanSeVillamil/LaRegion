@@ -111,7 +111,7 @@ app.use(express.static(path.join(__dirname, 'public')));
   }
 })();
 
-// 🔹 Middleware de protección
+// 🔹 Middleware de protección (para panel y admin)
 function protegerRuta(req, res, next) {
   if (req.session && req.session.usuario === 'admin') {
     next();
@@ -175,7 +175,7 @@ app.post('/logout', (req, res) => {
 });
 
 // ------------------------------
-// 📋 Rutas de Estados
+// 📋 Rutas de Estados (para panel)
 // ------------------------------
 app.post('/agregar', protegerRuta, async (req, res) => {
   const {
@@ -272,8 +272,6 @@ app.post('/eliminar', protegerRuta, async (req, res) => {
 app.post('/guardar-certificado', async (req, res) => {
   try {
     const data = req.body;
-
-    // Guardar en certificados
     await pool.query(`
       INSERT INTO certificados (
         documento_fianza, ciudad_expedicion, fecha_expedicion, anexo,
@@ -335,26 +333,6 @@ app.post('/guardar-certificado', async (req, res) => {
       data.objeto, data.observaciones, data.valor_contrato, data.clase_contrato, data.pagare,
       JSON.stringify(data.fianzas || []), data.total_afianzado, data.costo_neto, data.costos_admin, data.iva, data.total_pagar,
       data.clave, data.asesor, data.participacion, data.centro_pdr
-    ]);
-
-    // Guardar también en estados
-    await pool.query(`
-      INSERT INTO estados (numero, estado, contratante, beneficiario, contratante_direccion, contratante_ciudad, fecha_expedicion)
-      VALUES ($1, 'APROBADO', $2, $3, $4, $5, $6)
-      ON CONFLICT (numero) DO UPDATE SET
-        estado = EXCLUDED.estado,
-        contratante = EXCLUDED.contratante,
-        beneficiario = EXCLUDED.beneficiario,
-        contratante_direccion = EXCLUDED.contratante_direccion,
-        contratante_ciudad = EXCLUDED.contratante_ciudad,
-        fecha_expedicion = EXCLUDED.fecha_expedicion;
-    `, [
-      data.documento_fianza,
-      data.contratante,
-      data.beneficiario,
-      data.contratante_direccion,
-      data.contratante_ciudad,
-      data.fecha_expedicion
     ]);
 
     res.json({ exito: true });
