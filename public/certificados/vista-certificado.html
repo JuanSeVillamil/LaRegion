@@ -5,72 +5,124 @@
   <title>Vista Certificado</title>
   <style>
     body {
-      font-family: 'Times New Roman', serif;
+      font-family: Arial, sans-serif;
       margin: 40px;
-      background: #f5f5f5;
+      background: #fff;
+      position: relative;
     }
+
+    /* Marca de agua */
+    body::before {
+      content: "";
+      position: fixed;
+      top: 25%;
+      left: 15%;
+      width: 70%;
+      height: 70%;
+      background: url("/watermark.png") no-repeat center;
+      background-size: contain;
+      opacity: 0.1;
+      z-index: -1;
+    }
+
     .certificado {
       width: 210mm;
       min-height: 297mm;
       margin: auto;
-      padding: 40px;
-      background: #fff;
+      padding: 30px;
       border: 2px solid #000;
       box-shadow: 0 0 10px rgba(0,0,0,0.3);
+      background: #fff;
     }
+
     header {
       display: flex;
-      align-items: center;
       justify-content: space-between;
+      align-items: center;
       border-bottom: 2px solid #000;
       padding-bottom: 10px;
       margin-bottom: 20px;
     }
+
     header img {
-      height: 70px;
+      height: 80px;
     }
+
     h1 {
       text-align: center;
-      text-transform: uppercase;
       font-size: 22px;
       margin: 0;
+      flex: 1;
     }
+
     .seccion {
-      margin-bottom: 15px;
+      margin-bottom: 20px;
+      border-bottom: 1px solid #ccc;
+      padding-bottom: 10px;
     }
+
     .seccion h3 {
-      background: #eee;
-      padding: 5px;
       font-size: 16px;
-      border: 1px solid #ccc;
+      border-bottom: 1px solid #000;
+      margin-bottom: 10px;
+      padding-bottom: 3px;
+      text-transform: uppercase;
     }
-    .campo {
-      margin: 4px 0;
+
+    .campos {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px 40px;
     }
+
     .campo strong {
       display: inline-block;
-      width: 200px;
+      min-width: 120px;
     }
+
     table {
       width: 100%;
       border-collapse: collapse;
       margin-top: 10px;
+      font-size: 14px;
     }
+
     table th, table td {
       border: 1px solid #000;
       padding: 6px;
       text-align: center;
     }
+
+    .firmas {
+      margin-top: 50px;
+      display: flex;
+      justify-content: space-around;
+      text-align: center;
+    }
+
+    .firmas div {
+      width: 40%;
+    }
+
+    .firmas hr {
+      border: none;
+      border-top: 1px solid #000;
+      margin: 40px 0 10px 0;
+    }
+
     footer {
       margin-top: 30px;
       text-align: center;
       font-size: 12px;
+      color: #333;
     }
+
     @media print {
       body { background: none; margin: 0; }
       .certificado { border: none; box-shadow: none; }
       button { display: none; }
     }
+
     button {
       margin: 20px auto;
       display: block;
@@ -86,57 +138,68 @@
 <body>
   <div class="certificado">
     <header>
-      <img src="/logo.png" alt="Logo">
       <h1>Certificado de Fianza</h1>
-      <div></div>
+      <img src="/logo.png" alt="Logo">
     </header>
 
     <div class="seccion">
       <h3>Datos de Expedición</h3>
-      <div class="campo"><strong>Ciudad:</strong> <span id="ciudad_expedicion"></span></div>
-      <div class="campo"><strong>Fecha:</strong> <span id="fecha_expedicion"></span></div>
-      <div class="campo"><strong>No. Fianza:</strong> <span id="documento_fianza"></span></div>
-      <div class="campo"><strong>Anexo:</strong> <span id="anexo"></span></div>
+      <div class="campos">
+        <div class="campo"><strong>Ciudad:</strong> <span id="ciudad_expedicion"></span></div>
+        <div class="campo"><strong>Fecha:</strong> <span id="fecha_expedicion"></span></div>
+        <div class="campo"><strong>No. Fianza:</strong> <span id="documento_fianza"></span></div>
+        <div class="campo"><strong>Anexo:</strong> <span id="anexo"></span></div>
+      </div>
     </div>
 
     <div class="seccion">
       <h3>Contratante</h3>
-      <div class="campo"><strong>Nombre:</strong> <span id="contratante"></span></div>
-      <div class="campo"><strong>NIT:</strong> <span id="contratante_nit"></span></div>
-      <div class="campo"><strong>Dirección:</strong> <span id="contratante_direccion"></span></div>
-      <div class="campo"><strong>Teléfono:</strong> <span id="contratante_tel"></span></div>
-      <div class="campo"><strong>Ciudad:</strong> <span id="contratante_ciudad"></span></div>
+      <div class="campos">
+        <div class="campo"><strong>Nombre:</strong> <span id="contratante"></span></div>
+        <div class="campo"><strong>NIT:</strong> <span id="contratante_nit"></span></div>
+        <div class="campo"><strong>Dirección:</strong> <span id="contratante_direccion"></span></div>
+        <div class="campo"><strong>Teléfono:</strong> <span id="contratante_tel"></span></div>
+        <div class="campo"><strong>Ciudad:</strong> <span id="contratante_ciudad"></span></div>
+      </div>
     </div>
 
     <div class="seccion">
       <h3>Afianzado</h3>
-      <div class="campo"><strong>Nombre:</strong> <span id="afianzado"></span></div>
-      <div class="campo"><strong>NIT:</strong> <span id="afianzado_nit"></span></div>
-      <div class="campo"><strong>Dirección:</strong> <span id="afianzado_direccion"></span></div>
-      <div class="campo"><strong>Teléfono:</strong> <span id="afianzado_tel"></span></div>
-      <div class="campo"><strong>Ciudad:</strong> <span id="afianzado_ciudad"></span></div>
+      <div class="campos">
+        <div class="campo"><strong>Nombre:</strong> <span id="afianzado"></span></div>
+        <div class="campo"><strong>NIT:</strong> <span id="afianzado_nit"></span></div>
+        <div class="campo"><strong>Dirección:</strong> <span id="afianzado_direccion"></span></div>
+        <div class="campo"><strong>Teléfono:</strong> <span id="afianzado_tel"></span></div>
+        <div class="campo"><strong>Ciudad:</strong> <span id="afianzado_ciudad"></span></div>
+      </div>
     </div>
 
     <div class="seccion">
       <h3>Beneficiario</h3>
-      <div class="campo"><strong>Nombre:</strong> <span id="beneficiario"></span></div>
-      <div class="campo"><strong>NIT:</strong> <span id="beneficiario_nit"></span></div>
-      <div class="campo"><strong>Dirección:</strong> <span id="beneficiario_direccion"></span></div>
-      <div class="campo"><strong>Teléfono:</strong> <span id="beneficiario_tel"></span></div>
-      <div class="campo"><strong>Ciudad:</strong> <span id="beneficiario_ciudad"></span></div>
+      <div class="campos">
+        <div class="campo"><strong>Nombre:</strong> <span id="beneficiario"></span></div>
+        <div class="campo"><strong>NIT:</strong> <span id="beneficiario_nit"></span></div>
+        <div class="campo"><strong>Dirección:</strong> <span id="beneficiario_direccion"></span></div>
+        <div class="campo"><strong>Teléfono:</strong> <span id="beneficiario_tel"></span></div>
+        <div class="campo"><strong>Ciudad:</strong> <span id="beneficiario_ciudad"></span></div>
+      </div>
     </div>
 
     <div class="seccion">
       <h3>Objeto y Observaciones</h3>
-      <div class="campo"><strong>Objeto:</strong> <span id="objeto"></span></div>
-      <div class="campo"><strong>Observaciones:</strong> <span id="observaciones"></span></div>
+      <div class="campos">
+        <div class="campo"><strong>Objeto:</strong> <span id="objeto"></span></div>
+        <div class="campo"><strong>Observaciones:</strong> <span id="observaciones"></span></div>
+      </div>
     </div>
 
     <div class="seccion">
       <h3>Contrato</h3>
-      <div class="campo"><strong>Valor:</strong> <span id="valor_contrato"></span></div>
-      <div class="campo"><strong>Clase:</strong> <span id="clase_contrato"></span></div>
-      <div class="campo"><strong>Pagaré:</strong> <span id="pagare"></span></div>
+      <div class="campos">
+        <div class="campo"><strong>Valor:</strong> <span id="valor_contrato"></span></div>
+        <div class="campo"><strong>Clase:</strong> <span id="clase_contrato"></span></div>
+        <div class="campo"><strong>Pagaré:</strong> <span id="pagare"></span></div>
+      </div>
     </div>
 
     <div class="seccion">
@@ -151,19 +214,37 @@
 
     <div class="seccion">
       <h3>Costos</h3>
-      <div class="campo"><strong>Total Afianzado:</strong> <span id="total_afianzado"></span></div>
-      <div class="campo"><strong>Costo Neto:</strong> <span id="costo_neto"></span></div>
-      <div class="campo"><strong>Costos Admin:</strong> <span id="costos_admin"></span></div>
-      <div class="campo"><strong>IVA:</strong> <span id="iva"></span></div>
-      <div class="campo"><strong>Total a Pagar:</strong> <span id="total_pagar"></span></div>
+      <div class="campos">
+        <div class="campo"><strong>Total Afianzado:</strong> <span id="total_afianzado"></span></div>
+        <div class="campo"><strong>Costo Neto:</strong> <span id="costo_neto"></span></div>
+        <div class="campo"><strong>Costos Admin:</strong> <span id="costos_admin"></span></div>
+        <div class="campo"><strong>IVA:</strong> <span id="iva"></span></div>
+        <div class="campo"><strong>Total a Pagar:</strong> <span id="total_pagar"></span></div>
+      </div>
     </div>
 
     <div class="seccion">
       <h3>Otros Datos</h3>
-      <div class="campo"><strong>Clave:</strong> <span id="clave"></span></div>
-      <div class="campo"><strong>Asesor:</strong> <span id="asesor"></span></div>
-      <div class="campo"><strong>% Participación:</strong> <span id="participacion"></span></div>
-      <div class="campo"><strong>Centro PDR:</strong> <span id="centro_pdr"></span></div>
+      <div class="campos">
+        <div class="campo"><strong>Clave:</strong> <span id="clave"></span></div>
+        <div class="campo"><strong>Asesor:</strong> <span id="asesor"></span></div>
+        <div class="campo"><strong>% Participación:</strong> <span id="participacion"></span></div>
+        <div class="campo"><strong>Centro PDR:</strong> <span id="centro_pdr"></span></div>
+      </div>
+    </div>
+
+    <!-- Sección de Firmas -->
+    <div class="firmas">
+      <div>
+        <hr>
+        <p><strong>Firma Autorizada</strong></p>
+        <p>Afianzadora La Regional</p>
+      </div>
+      <div>
+        <hr>
+        <p><strong>Beneficiario</strong></p>
+        <p><span id="beneficiario"></span></p>
+      </div>
     </div>
 
     <footer>
@@ -193,7 +274,7 @@
           if (el) el.textContent = data[key];
         }
 
-        // Fianzas (JSONB en la BD)
+        // Fianzas
         const tbody = document.querySelector("#tabla-fianzas tbody");
         if (data.fianzas) {
           const fianzas = Array.isArray(data.fianzas) ? data.fianzas : JSON.parse(data.fianzas);
