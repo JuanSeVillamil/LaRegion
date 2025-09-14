@@ -2,7 +2,7 @@
 <html lang="es">
 <head>
   <meta charset="UTF-8" />
-  <title>Vista Certificado</title>
+  <title>Certificado de Afianamiento</title>
   <style>
     body {
       font-family: Arial, sans-serif;
@@ -32,10 +32,16 @@
       z-index: 0;
     }
 
-    .watermark img {
-      width: 100%;
-      height: auto;
+    .watermark {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      width: 180mm; /* prueba entre 180mm y 200mm */
+      opacity: 0.08;
+      z-index: 0;
     }
+
 
     header {
       display: flex;
